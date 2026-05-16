@@ -1,3 +1,5 @@
+import sqlite3
+
 # noinspection PyPackageRequirements
 from telebot.apihelper import ApiTelegramException
 
@@ -256,7 +258,7 @@ def add_event_handler(message: Message):
 
     try:
         request.entity.create_event(new_event_date, markdown_text)
-    except (TextIsTooBig, WrongDate, LimitExceeded):
+    except (TextIsTooBig, WrongDate, LimitExceeded, sqlite3.Error):
         error_translate = get_translate("errors.error")
         bot.reply_to(message, error_translate, reply_markup=delmarkup())
     else:
