@@ -162,7 +162,13 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
                             else date
                         )
                     ).strip(),
-                    "style": "primary" if is_now_year and is_now_month and today == day else None,
+                    "style": (
+                        "primary"  # blue
+                        if is_now_year and is_now_month and today == day
+                        else "success"  # green
+                        if tag_event
+                        else None
+                    ),
                 }
                 week_buttons.append({f"{tag_today}{day}{tag_event}{tag_birthday}": button_data})
         buttons_lines.append(week_buttons)
@@ -296,7 +302,13 @@ SELECT date
             tag_birthday = "!" if (numm in every_year or every_month) else ""
             button_data = {
                 "callback_data": f"cm ({command},{back},({year},{numm}),{arguments})",
-                "style": "primary" if is_now_year and numm == now_month else None,
+                "style": (
+                    "primary"  # blue
+                    if is_now_year and numm == now_month
+                    else "success"  # green
+                    if tag_event
+                    else None
+                ),
             }
             month_buttons[-1].append({f"{tag_today}{nameM}{tag_event}{tag_birthday}": button_data})
 
@@ -397,7 +409,13 @@ SELECT 1
             tag_birthday = "!" if every_year else ""
             button_data = {
                 "callback_data": f"cy ({command},{back},{numY},{arguments})",
-                "style": "primary" if numY == now_year else None,
+                "style": (
+                    "primary"  # blue
+                    if numY == now_year
+                    else "success"  # green
+                    if tag_event
+                    else None
+                ),
             }
             years_buttons[-1].append({f"{tag_today}{numY}{tag_event}{tag_birthday}": button_data})
 
