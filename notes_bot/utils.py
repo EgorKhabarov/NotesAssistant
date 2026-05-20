@@ -79,7 +79,7 @@ def telegram_log(action: str, text: str):
     if request.entity:
         request_id = request.entity.request_id
         request_chat_id = request.entity.request_chat_id
-        status = request.entity.user.user_status if request.is_user else request.entity.group.member_status
+        status = request.entity.user.user_status if request.is_user else request.entity.group.member_status if request.is_member else None
         logger.info(f"[{entity_type}:{request_id}][{request_chat_id:<10}{thread_id_str}][{status}].{action} {text}")
     else:
         if is_not_in_white_list:

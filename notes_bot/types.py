@@ -82,14 +82,14 @@ SELECT g.group_id,
   JOIN users  AS u
     /*
     If the user is banned, the group is banned for everyone `ON g.owner_id = u.user_id`
-    If a user is banned, the group is banned for that user  `ON u.chat_id = :user_chat_id`
+    If a user is banned, the group is banned for that user  `ON u.chat_id = \\:user_chat_id`
     */
     ON u.chat_id = :user_chat_id
  WHERE g.chat_id = :group_chat_id;
 """,
                 params={
-                    "group_chat_id": group_chat_id,
                     "user_chat_id": user_chat_id,
+                    "group_chat_id": group_chat_id,
                 },
             )[0]
         except DataBaseError as e:
