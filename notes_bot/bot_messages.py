@@ -1465,10 +1465,8 @@ AND (
     ( -- Every year
         (
             statuses LIKE '%🎉%'
-            OR
-            statuses LIKE '%🎊%'
-            OR
-            statuses LIKE '%📆%'
+            OR statuses LIKE '%🎊%'
+            OR statuses LIKE '%📆%'
         )
         AND SUBSTR(date, 1, 5) IN ({", ".join(f"'{date:%d.%m}'" for date in dates)})
     )

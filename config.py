@@ -142,5 +142,5 @@ recent_changes_time ASC
 }
 
 string_branch = "" if branch == "master" else f":{branch}"
-__version__ = "2026.05.20.1"
+__version__ = "2026.05.28.0"
 __author__ = "EgorKhabarov"
