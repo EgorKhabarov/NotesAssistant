@@ -24,8 +24,8 @@ GITHUB_WEBHOOK_SECRET: ""  # GitHub webhook secret
 
 WSGI_PATH: ""  # WSGI file path. For PythonAnyWhere "/var/www/<your_username>_pythonanywhere_com_wsgi.py"
 
-ADMIN_IDS:  # list of admins chat_id
-  - admin_chat_id
+ADMIN_IDS: []  # list of admins chat_id
+  # - admin_chat_id
 
 WHITE_LIST: []  # list of chat_id
   # - your_chat_id
