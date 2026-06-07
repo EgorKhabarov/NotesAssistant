@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  bot_server:
+    build: .
+    container_name: NotesAssistantContainer
+    ports:
+      - "5000:5000"
+    volumes:
+      - notes_data:/app/data
+      - notes_logs:/app/logs
+    restart: always
+
+volumes:
+  notes_data:
+    name: NotesAssistantData
+  notes_logs:
+    name: NotesAssistantLogs

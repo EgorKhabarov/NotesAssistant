@@ -76,7 +76,10 @@ Add the resulting `chat_id` to `ADMIN_IDS` in `config.yaml` and restart the bot.
 docker build -t NotesAssistant .
 docker volume create NotesAssistantData
 docker volume create NotesAssistantLogs
-docker run -p 5000:5000 -v NotesAssistantData:/app/data -v NotesAssistantLogs:/app/logs --name NotesAssistantContainer NotesAssistant
+docker run -p 5000:5000 -v NotesAssistantData:/app/data -v NotesAssistantLogs:/app/logs --name NotesAssistantContainer NotesAssistant -d NotesAssistant
+```
+```shell
+docker compose up -d --build
 ```
 
 ---
