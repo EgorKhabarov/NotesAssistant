@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ICON_SIZE: int = 778
 ICON_NAME: str = "calendar_icon"
-FONT_PATH = "../fonts/roboto-black.ttf"
+FONT_PATH = "../fonts/Roboto-Black.ttf"
 # http://allfont.net/cache/fonts/roboto-black_9d5456046bfe9a00b0b9325cda8c55f3.ttf
 ICON_VERSION: str = ""
 

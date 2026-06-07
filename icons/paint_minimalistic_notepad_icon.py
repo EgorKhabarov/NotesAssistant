@@ -44,7 +44,6 @@ def draw_lock(image: Image.Image):
     x, y = 450, 346
 
     draw.rounded_rectangle((x, 94 + y, 203 + x, 287 + y), 35, fill=COLOR_LOCK)
-
     draw.rounded_rectangle(
         (47 + x, y, 159 + x, 93 + y),
         50,

@@ -13,7 +13,7 @@ from config import LIMIT_IMAGE_GENERATOR_URL
 
 
 noimage = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
-
+FONT_PATH = "fonts/LiberationSans-Regular.ttf"
 colors = {
     "g": "#00cc00",
     "y": "#fcf11d",
@@ -92,7 +92,7 @@ def _semicircle(title: str, x: int, y: int, theme: str):
     else:
         bg_color, color = colors["bg r"], colors["r"]
 
-    font = ImageFont.truetype("fonts/arial.ttf", 30)
+    font = ImageFont.truetype(FONT_PATH, 30)
     image = Image.new("RGB", (291, 202), background_color)
     draw = Draw(image)
 
