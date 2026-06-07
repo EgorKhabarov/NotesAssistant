@@ -10,7 +10,7 @@ import requests
 from cachetools import TTLCache, LRUCache, cached
 
 # noinspection PyPackageRequirements
-from telebot.types import Message, CallbackQuery, BotCommandScopeChat
+from telebot.types import Message, CallbackQuery, BotCommand, BotCommandScopeChat
 
 # noinspection PyPackageRequirements
 from telebot.apihelper import ApiTelegramException
@@ -682,7 +682,8 @@ def set_bot_commands(not_login: bool = False):
     else:
         status = 1
 
-    commands = get_translate(f"buttons.commands.{status}.{request.entity_type}")
+    commands_data = get_translate(f"buttons.commands.{status}.{request.entity_type}")
+    commands = [BotCommand(*command_data) for command_data in commands_data]
     try:
         bot.set_my_commands(commands, BotCommandScopeChat(request.chat_id))
     except ApiTelegramException as e:
