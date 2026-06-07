@@ -1,8 +1,11 @@
+import time
+
 # noinspection PyPackageRequirements
 from telebot import TeleBot
 from table2string import Table
 
 import config
+from notes_api.logger import logger
 from telegram_utils.command_parser import command_regex
 
 
@@ -16,7 +19,13 @@ bot = TeleBot(config.BOT_TOKEN, threaded=threaded, num_threads=num_threads)
 bot.parse_mode = "html"
 bot.disable_web_page_preview = True
 bot.protect_content = False
-bot_webhook_info = bot.get_webhook_info()
+for i in range(5):
+    try:
+        bot_webhook_info = bot.get_webhook_info()
+        break
+    except Exception as e:
+        logger.log(f"Attempt {i+1} get_webhook_info: {e}")
+        time.sleep(3)
 bot_settings = """
 Bot Settings => Group Privacy => disabled
 Bot Settings => Inline Mode   => disabled
