@@ -27,8 +27,11 @@ def get_translate(target: str, lang_iso: str | None = None) -> str | Any:
         request.entity.settings.lang if request.entity else "en"
     )
     result: dict = translation[_lang_iso]
-    for key in target.split("."):
-        result = result[key]
+    try:
+        for key in target.split("."):
+            result = result[key]
+    except KeyError as e:
+        raise KeyError(f"{e} ({target})") from e
     return result
 
 

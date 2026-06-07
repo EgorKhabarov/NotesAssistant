@@ -490,7 +490,8 @@ reg_date: {}</code></pre>
             "BotVersion": f"""
 <b>Версия бота</b>
 
-<pre><code class='language-версия'>{config.__version__}{config.string_branch}</code></pre>
+v{config.__version__}{config.string_branch}
+<a href="{config.__repository__}">GitHub</a>
 """,
             "CommandOpen": """
 <u>Команды бота > <b>/open</b></u>

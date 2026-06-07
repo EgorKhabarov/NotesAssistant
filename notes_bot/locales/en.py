@@ -479,7 +479,8 @@ The bot notifies about important "ðŸŸ¥" events, events with recurring status ("ð
             "BotVersion": f"""
 <b>Bot Version</b>
 
-<pre><code class='language-version'>{config.__version__}{config.string_branch}</code></pre>
+v{config.__version__}{config.string_branch}
+<a href="{config.__repository__}">GitHub</a>
 """,
             "CommandOpen": """
 <u>Bot commands > <b>/open</b></u>

@@ -2,7 +2,6 @@ import re
 import html
 import inspect
 import traceback
-from time import sleep
 from functools import wraps
 from ast import literal_eval
 from datetime import datetime
@@ -281,7 +280,7 @@ def command_handler(message: Message) -> None:
     # Help shortcuts
     match command_text:
         case "commands":
-            help_message("page_commands").send()
+            help_message("page commands").send()
             return
         case "open":
             help_message("CommandOpen", "page commands").send()
@@ -348,7 +347,7 @@ def command_handler(message: Message) -> None:
         value = bot.send_dice(
             chat_id, message_thread_id=request.query.message_thread_id or None
         ).json["dice"]["value"]
-        sleep(4)
+        # sleep(4)
         TextMessage(str(value)).send()
 
     elif command_text == "export":
