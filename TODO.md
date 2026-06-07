@@ -1,7 +1,15 @@
-* [ ] Fix notifications
-* [ ] Tests
-* [ ] Caching
-* [ ] Optimization of database queries
-* [ ] ORM
-* [ ] Flask REST API server + Android app
-* [ ] Update README.md
+- [ ] Fix notifications
+- [ ] Tests
+- [ ] Caching
+- [ ] Optimization testing and fix database queries
+- [ ] ORM queries
+- [ ] REST API server Flask|FastAPI + Android app
+- [ ] Bulk emoji change
+  - Remove status
+  - Add status
+    - If there is no space, then ignores
+    - If it is incompatible, it creates a pop-up that the action was not applied for x notes due to status incompatibility
+  - Replace status
+- [ ] System notifications to the bot owner's chat or via Discord webhook
+- [ ] A separate field for repeating events `repeat_rule` and more customizable repetition settings
+- [ ] Async
