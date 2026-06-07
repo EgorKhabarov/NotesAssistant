@@ -503,9 +503,6 @@ reg_date: {}</code></pre>
 /open_calendar
 /open_calendar_year
 
-<b>Help message</b>
-/open_help
-
 <b>Open</b>
 /open[_&lt;year&gt;[_&lt;month&gt;[_&lt;day&gt;[_page_&lt;page&gt;]]]]
 """,

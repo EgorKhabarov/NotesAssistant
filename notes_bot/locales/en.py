@@ -494,9 +494,6 @@ The bot notifies about important "ğŸŸ¥" events, events with recurring status ("ğ
 <b>Yearly calendar message</b>
 /open_calendar_year
 
-<b>Help message</b>
-/open_help
-
 <b>Open</b>
 /open[_&lt;year&gt;[_&lt;month&gt;[_&lt;day&gt;[_page_&lt;page&gt;]]]]
 """,
