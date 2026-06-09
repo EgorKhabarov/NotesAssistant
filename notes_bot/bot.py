@@ -24,7 +24,7 @@ for i in range(5):
         bot_webhook_info = bot.get_webhook_info()
         break
     except Exception as e:
-        logger.log(f"Attempt {i+1} get_webhook_info: {e}")
+        logger.info(f"Attempt {i+1} get_webhook_info: {e}")
         time.sleep(3)
 bot_settings = """
 Bot Settings => Group Privacy => disabled

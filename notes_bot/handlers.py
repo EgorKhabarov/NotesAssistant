@@ -260,6 +260,16 @@ def not_login_handler(x: CallbackQuery | Message) -> None:
     elif match := re_user_signup_message.findall(message.text):
         signup(*match[0])
 
+    elif command_text == "id":
+        if message.reply_to_message:
+            text = f"""
+Message id <code>{message.reply_to_message.id}</code>
+Chat id <code>{message.chat.id}</code>
+"""
+        else:
+            text = f"Chat id <code>{message.chat.id}</code>"
+        TextMessage(text).reply(message)
+
     else:
         if request.is_user:
             TextMessage(get_translate("errors.no_account"), markup).reply(message)

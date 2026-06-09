@@ -133,6 +133,6 @@ if __name__ == "__main__":
     img = image_generator(ICON_SIZE)
     # draw_lock(img)
     # draw_clock(img)
-    # from icons.utils import get_emoji
+    # from icons.utils import draw_emoji
     # draw_emoji(img, "📝")
     img.save(f"{ICON_NAME}.png", "PNG")
