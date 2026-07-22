@@ -5,10 +5,8 @@ on:
     branches: ["master"]
   pull_request:
     branches: ["master"]
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -19,9 +17,7 @@ jobs:
           "3.12",
           "3.13",
           "3.14",
-          # "pypy-3.10",
         ]
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}

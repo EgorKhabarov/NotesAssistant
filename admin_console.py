@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import os
 import csv
 import subprocess
@@ -23,7 +23,7 @@ def execute(
     max_height: int | type(max) | type(max) | None = max,
     maximize_height: bool = False,
     align: tuple[str, ...] | str = "*",
-    name: str = None,
+    name: str | None = None,
     name_align: str = "^",
     return_data: bool = False,
     theme: Theme = Themes.ascii_thin,
@@ -96,6 +96,7 @@ def execute(
         if return_data:
             return pformat(result)
         pprint(result)
+    return None
 
 
 def export(query: str = "SELECT * FROM events;", params: dict | tuple = ()) -> str:

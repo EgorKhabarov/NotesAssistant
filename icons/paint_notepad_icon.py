@@ -9,7 +9,9 @@ ICON_VERSION: str = ""
 
 
 def image_generator(
-    icon_size: int, font_path: str, icon_version: str | None = None
+    icon_size: int,
+    font_path: str,
+    icon_version: str | None = None,
 ) -> Image:
     main_color_type = "b"
     match main_color_type:

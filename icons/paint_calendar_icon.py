@@ -9,7 +9,9 @@ ICON_VERSION: str = ""
 
 
 def image_generator(
-    icon_size: int, font_path: str, icon_version: str | None = None
+    icon_size: int,
+    font_path: str,
+    icon_version: str | None = None,
 ) -> Image:
     _image = Image.new("RGB", (icon_size, icon_size), "white")
     draw = ImageDraw.Draw(_image)

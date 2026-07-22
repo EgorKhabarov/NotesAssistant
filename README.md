@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 ### Settings
 
-Edit `config.yaml` in the bot directory
+Edit `config.yaml`
 
 ```.env
 BOT_TOKEN: ""        # Telegram bot token from https://t.me/BotFather

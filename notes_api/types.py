@@ -384,7 +384,10 @@ SELECT (
             raise ApiError(e)
 
     def is_exceeded_for_events(
-        self, date: str | datetime = None, event_count: int = 0, symbol_count: int = 0
+        self,
+        date: str | datetime | None = None,
+        event_count: int = 0,
+        symbol_count: int = 0,
     ) -> bool:
         inf = float("inf")
         actual_limits = self.get_event_limits(date)
@@ -1405,7 +1408,11 @@ UPDATE events
             raise ValueError("Format Is Not Valid")
 
         return ExportData(
-            filename, self.safe_user_id, self.group_id, __sql_where, __sql_params
+            filename,
+            self.safe_user_id,
+            self.group_id,
+            __sql_where,
+            __sql_params,
         ).export(file_format)
 
     def check_media_exists(self, event_id: int, media_id: str) -> bool:

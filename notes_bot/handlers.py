@@ -132,7 +132,8 @@ def not_login_handler(x: CallbackQuery | Message) -> None:
     message = x if isinstance(x, Message) else x.message
 
     if isinstance(x, CallbackQuery) and x.data == "md":
-        return delete_message_action(message)
+        delete_message_action(message)
+        return None
 
     parsed_command = parse_command(message.text, {"arg": "long str"})
     command_text = parsed_command["command"]
@@ -1542,8 +1543,10 @@ class CallBackHandler:
                 f"lm {calendar_date:%d.%m.%Y}",
                 "mna",
             )
-            return generated.edit()
+            generated.edit()
+            return None
         limits_message(date).edit(disable_web_page_preview=False)
+        return None
 
     @prefix("grcr")
     def group_create(self, message_id: int):
@@ -1557,6 +1560,7 @@ class CallBackHandler:
         markup = generate_buttons([[{get_theme_emoji("back"): "mngrs"}]])
         TextMessage(text, markup).edit()
         CallBackAnswer(get_translate("text.send_group_name")).answer()
+        return None
 
     @prefix("gre", {"group_id": "str", "file_format": ("str", "csv")})
     def group_export(
@@ -1584,7 +1588,6 @@ class CallBackHandler:
                 return 2
             else:
                 return 1
-
         return 3
 
     @prefix("grdb", {"group_id": "str", "mode": ("str", "al")})

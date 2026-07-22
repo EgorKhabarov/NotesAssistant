@@ -1,4 +1,5 @@
 SQLALCHEMY_DATABASE_URI: {
+    "<branch_name>": "sqlite:///data/branch_name_database_example.sqlite3",
     "master": "sqlite:///data/database.sqlite3",
 }
 LOG_FILE_PATH: "logs/latest.log"

@@ -28,7 +28,7 @@ pip install -r requirements.txt
 
 ### Настройка
 
-Edit `config.yaml` in the bot directory
+Измените `config.yaml`
 
 ```.env
 BOT_TOKEN: ""        # Telegram bot token from https://t.me/BotFather
@@ -193,6 +193,7 @@ docker run -p 5000:5000 -v NotesAssistantData:/app/data -v NotesAssistantLogs:/a
 > [!TIP]
 > При нажатии на <kbd>⟳</kbd> в календаре открывается сегодняшняя дата.
 
+
 #### Colors
 
 | Цвет                                                           | Обозначение             |
@@ -226,6 +227,7 @@ docker run -p 5000:5000 -v NotesAssistantData:/app/data -v NotesAssistantLogs:/a
 ## notifications
 
 Сообщение с заметками на сегодня, завтра, послезавтра, послезавтра и через неделю.
+
 
 ## settings
 
@@ -343,6 +345,7 @@ docker run -p 5000:5000 -v NotesAssistantData:/app/data -v NotesAssistantLogs:/a
 | default     | 20          | 4000          | 75            | 10000           | 500          | 80000          | 500         | 100000        |
 | premium     | 40          | 8000          | 100           | 15000           | 750          | 100000         | 900         | 150000        |
 | admin       | 60          | 20000         | 200           | 65000           | 1000         | 120000         | 2000        | 200000        |
+
 
 ## Поиск
 

@@ -346,7 +346,8 @@ def frequently_used_dates_settings_message(
 
 
 def help_message(
-    path: str = "page main", markup_path: str | None = None
+    path: str = "page main",
+    markup_path: str | None = None,
 ) -> TextMessage:
     """
     Help message
@@ -376,7 +377,9 @@ def help_message(
 
 
 def daily_message(
-    date: datetime | str, id_list: list[int] = (), page: int = 0
+    date: datetime | str,
+    id_list: list[int] = (),
+    page: int = 0,
 ) -> EventsMessage:
     """
     Generates a message for one day
@@ -894,7 +897,9 @@ def confirm_changes_message(message: Message) -> None | int:
 
 
 def recurring_events_message(
-    date: str, id_list: list[int] = (), page: int = 0
+    date: str,
+    id_list: list[int] = (),
+    page: int = 0,
 ) -> EventsMessage:
     """
     :param date: message date
