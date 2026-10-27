@@ -28,10 +28,9 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
         python -m pip install ruff pytest
-    # black
-    # - name: Lint with black
-    #   run: |
-    #     black . --check --diff
+    - name: Lint with black
+      run: |
+        black . --check --diff
     - name: Lint with Ruff
       run: |
         # BLE001 - Do not catch blind exception: `Exception`
