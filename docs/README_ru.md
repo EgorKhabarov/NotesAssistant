@@ -78,6 +78,9 @@ docker volume create NotesAssistantData
 docker volume create NotesAssistantLogs
 docker run -p 5000:5000 -v NotesAssistantData:/app/data -v NotesAssistantLogs:/app/logs --name NotesAssistantContainer NotesAssistant
 ```
+```shell
+docker compose up -d --build
+```
 
 ---
 
