@@ -299,10 +299,12 @@ def settings_message(
         [
             {get_theme_emoji("back"): commit_changes("mnm")},
             {"🗂": commit_changes("frd")},
-            {"💾": {
-                "callback_data": format_call_data(prefix="sts"),
-                "style": "danger" if commit else "primary" if updated else None,
-            }},
+            {
+                "💾": {
+                    "callback_data": format_call_data(prefix="sts"),
+                    "style": "danger" if commit else "primary" if updated else None,
+                }
+            },
         ],
     ]
     return TextMessage(text, generate_inline_buttons(markup))
@@ -417,7 +419,9 @@ AND removal_time IS NULL
             {"🔄": f"dl {date:%d.%m.%Y}"},
         ],
     ]
-    generated = EventsMessage(f"{date:%d.%m.%Y}", markup=generate_inline_buttons(markup), page=page)
+    generated = EventsMessage(
+        f"{date:%d.%m.%Y}", markup=generate_inline_buttons(markup), page=page
+    )
 
     if id_list:
         generated.get_page_events(sql_where, params, id_list, "day")
@@ -545,7 +549,9 @@ def event_message(
         delete_permanently_translate = get_translate("text.delete_permanently")
         recover_translate = get_translate("text.recover")
         delete_permanently_button = {
-            "callback_data": f"bed {event_id}" if is_deletion_confirmed else f"bemc {event_id}",
+            "callback_data": (
+                f"bed {event_id}" if is_deletion_confirmed else f"bemc {event_id}"
+            ),
             "style": "danger" if is_deletion_confirmed else None,
         }
         markup = [
@@ -592,7 +598,9 @@ AND removal_time IS {'NOT' if is_in_wastebasket else ''} NULL
         delete_permanently_translate = get_translate("text.delete_permanently")
         recover_translate = get_translate("text.recover")
         delete_permanently_button = {
-            "callback_data": f"bsd {string_id}" if is_deletion_confirmed else f"bsmc {string_id}",
+            "callback_data": (
+                f"bsd {string_id}" if is_deletion_confirmed else f"bsmc {string_id}"
+            ),
             "style": "danger" if is_deletion_confirmed else None,
         }
         markup = [
@@ -834,15 +842,16 @@ def confirm_changes_message(message: Message) -> None | int:
                 {
                     f"{event_id} {markdown_text[:20]}".ljust(60, "⠀"): {
                         "switch_inline_query_current_chat": (
-                            f"event({event_id}, {message_id}).text\n"
-                            f"{markdown_text}"
+                            f"event({event_id}, {message_id}).text\n{markdown_text}"
                         )
                     }
                 },
                 {get_theme_emoji("del"): "md"},
             ]
         ]
-        TextMessage(translate, generate_inline_buttons(markup)).send(reply_to_message_id=message_id)
+        TextMessage(translate, generate_inline_buttons(markup)).send(
+            reply_to_message_id=message_id
+        )
         return
 
     text_diff = highlight_text_difference(
@@ -1036,9 +1045,11 @@ def before_event_delete_message(
     delete_permanently = get_translate("text.delete_permanently")
     trash_bin = get_translate("text.trash_bin")
     delete_permanently_button = {
-        "callback_data": f"ed {event.event_id} {event.date}"
-        if is_deletion_confirmed
-        else f"ebdc {event.event_id} {event.date}",
+        "callback_data": (
+            f"ed {event.event_id} {event.date}"
+            if is_deletion_confirmed
+            else f"ebdc {event.event_id} {event.date}"
+        ),
         "style": "danger" if is_deletion_confirmed else None,
     }
     markup = [
@@ -1086,7 +1097,9 @@ AND removal_time IS NULL
     delete_permanently = get_translate("text.delete_permanently")
     trash_bin = get_translate("text.trash_bin")
     delete_permanently_button = {
-        "callback_data": f"esd {string_id} {date}" if is_deletion_confirmed else f"esbdc {string_id}",
+        "callback_data": (
+            f"esd {string_id} {date}" if is_deletion_confirmed else f"esbdc {string_id}"
+        ),
         "style": "danger" if is_deletion_confirmed else None,
     }
     markup = [
@@ -1658,7 +1671,9 @@ def group_message(
 
     if request.is_user:
         startgroup_data = f"group-{group.owner_id}-{group.group_id}"
-        startgroup_url = f"https://t.me/{bot.user.username}?startgroup={startgroup_data}"
+        startgroup_url = (
+            f"https://t.me/{bot.user.username}?startgroup={startgroup_data}"
+        )
 
         leave_group = get_translate("text.leave_group")
         change_group_name = "✏️ " + get_translate("text.change_group_name")
@@ -1891,10 +1906,12 @@ def account_message(message_id: int | None = None) -> TextMessage:
         [
             {get_theme_emoji("back"): "mnm"},
             {"📊": "lm now"},
-            {f"{get_translate('text.logout')}🚪👈": {
-                "callback_data": "logout",
-                "style": "danger",
-            }},
+            {
+                f"{get_translate('text.logout')}🚪👈": {
+                    "callback_data": "logout",
+                    "style": "danger",
+                }
+            },
         ],
     ]
     return TextMessage(text, generate_inline_buttons(markup))
@@ -1991,7 +2008,9 @@ def select_events_message(
             {"↗️": "bsm _" if in_bin else "esm _"},
         ]
     )
-    generated = TextMessage(get_translate("select.events"), generate_inline_buttons(markup))
+    generated = TextMessage(
+        get_translate("select.events"), generate_inline_buttons(markup)
+    )
     return generated
 
 

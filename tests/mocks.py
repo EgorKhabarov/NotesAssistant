@@ -31,9 +31,7 @@ def message_mock(message_id: int, text: str, html_text=None) -> Message:
     )
 
 
-def callback_mock(
-    data: str, message: Message | None = None
-) -> CallbackQuery:
+def callback_mock(data: str, message: Message | None = None) -> CallbackQuery:
     if message is None:
         message = message_mock(1, "message text")
     return CallbackQuery(

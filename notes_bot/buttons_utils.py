@@ -148,6 +148,8 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
                 tag_event = (number_to_power(x) if x < 10 else "*") if x else ""
                 tag_birthday = "!" if (day in every_year_or_month) else ""
                 date = f"{day:0>2}.{month:0>2}.{year}"
+                # primary - blue
+                # success - green
                 button_data = {
                     "callback_data": (
                         f"{command[1:-1] if command else 'dl'} "
@@ -162,14 +164,14 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
                         )
                     ).strip(),
                     "style": (
-                        "primary"  # blue
+                        "primary"
                         if is_now_year and is_now_month and today == day
-                        else "success"  # green
-                        if tag_event
-                        else None
+                        else "success" if tag_event else None
                     ),
                 }
-                week_buttons.append({f"{tag_today}{day}{tag_event}{tag_birthday}": button_data})
+                week_buttons.append(
+                    {f"{tag_today}{day}{tag_event}{tag_birthday}": button_data}
+                )
         buttons_lines.append(week_buttons)
 
     arrows_buttons = [
@@ -190,7 +192,11 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
         arrows_buttons,
         [
             (
-                {get_theme_emoji("back"): f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"}
+                {
+                    get_theme_emoji("back"): (
+                        f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"
+                    )
+                }
                 if back
                 else {}
             ),
@@ -299,20 +305,26 @@ SELECT date
             x = month_list.get(numm)
             tag_event = (number_to_power(x) if x < 1000 else "*") if x else ""
             tag_birthday = "!" if (numm in every_year or every_month) else ""
+            # primary - blue
+            # success - green
             button_data = {
                 "callback_data": f"cm ({command},{back},({year},{numm}),{arguments})",
                 "style": (
-                    "primary"  # blue
+                    "primary"
                     if is_now_year and numm == now_month
-                    else "success"  # green
-                    if tag_event
-                    else None
+                    else "success" if tag_event else None
                 ),
             }
-            month_buttons[-1].append({f"{tag_today}{nameM}{tag_event}{tag_birthday}": button_data})
+            month_buttons[-1].append(
+                {f"{tag_today}{nameM}{tag_event}{tag_birthday}": button_data}
+            )
 
     markup = [
-        [{f"{year} ({year_info(year)})": f"ct ({command},{back},{str(year)[:3]},{arguments})"}],
+        [
+            {
+                f"{year} ({year_info(year)})": f"ct ({command},{back},{str(year)[:3]},{arguments})"
+            }
+        ],
         *month_buttons,
         [
             {text: f"cy ({command},{back},{y},{arguments})"}
@@ -320,7 +332,10 @@ SELECT date
         ],
         [
             (
-                {get_theme_emoji("back"): f"{back[1:-1]}" f"{f' {arguments[1:-1]}' if arguments else ''}"}
+                {
+                    get_theme_emoji("back"): f"{back[1:-1]}"
+                    f"{f' {arguments[1:-1]}' if arguments else ''}"
+                }
                 if back
                 else {}
             ),
@@ -409,14 +424,12 @@ SELECT 1
             button_data = {
                 "callback_data": f"cy ({command},{back},{numY},{arguments})",
                 "style": (
-                    "primary"  # blue
-                    if numY == now_year
-                    else "success"  # green
-                    if tag_event
-                    else None
+                    "primary" if numY == now_year else "success" if tag_event else None
                 ),
             }
-            years_buttons[-1].append({f"{tag_today}{numY}{tag_event}{tag_birthday}": button_data})
+            years_buttons[-1].append(
+                {f"{tag_today}{numY}{tag_event}{tag_birthday}": button_data}
+            )
 
     markup = [
         *years_buttons,
@@ -430,7 +443,11 @@ SELECT 1
         ],
         [
             (
-                {get_theme_emoji("back"): f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"}
+                {
+                    get_theme_emoji("back"): (
+                        f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"
+                    )
+                }
                 if back
                 else {}
             ),
@@ -506,7 +523,9 @@ def create_select_status_keyboard(
         markup = [
             *[
                 [
-                    {f"{title:{config.ts}<80}": f"{prefix} {string_statuses} {folder} {arguments}"}
+                    {
+                        f"{title:{config.ts}<80}": f"{prefix} {string_statuses} {folder} {arguments}"
+                    }
                     for (title, folder) in row
                 ]
                 for row in buttons_data
@@ -538,7 +557,9 @@ def create_select_status_keyboard(
             ],
         ]
     else:
-        buttons_data: tuple[tuple[str]] = get_translate(f"buttons.select_status.{folder_path}")
+        buttons_data: tuple[tuple[str]] = get_translate(
+            f"buttons.select_status.{folder_path}"
+        )
 
         def unique_string_statuses(row: str) -> str:
             new_status = row.split(maxsplit=1)[0]
@@ -563,7 +584,13 @@ def create_select_status_keyboard(
                 ]
                 for status_column in buttons_data
             ],
-            [{get_theme_emoji("back"): f"{prefix} {string_statuses} folders {arguments}"}],
+            [
+                {
+                    get_theme_emoji("back"): (
+                        f"{prefix} {string_statuses} folders {arguments}"
+                    )
+                }
+            ],
         ]
 
     return generate_inline_buttons(markup)

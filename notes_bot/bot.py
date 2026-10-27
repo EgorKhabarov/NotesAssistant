@@ -47,7 +47,9 @@ def bot_log_info():
             "log_file": config.LOG_FILE_PATH,
             "notifications": config.BOT_NOTIFICATIONS,
             **({"webhook": True} if bot_webhook_info.url else {}),
-            "white list": f"On ({len(config.WHITE_LIST)})" if config.WHITE_LIST else "Off",
+            "white list": (
+                f"On ({len(config.WHITE_LIST)})" if config.WHITE_LIST else "Off"
+            ),
             "__version__": f"{config.__version__}{config.string_branch}",
         }
     )

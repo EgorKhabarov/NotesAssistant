@@ -12,7 +12,9 @@ class LazyTranslation(dict):
         except ModuleNotFoundError:
             if lang_iso != "en":
                 return self["en"]
-            raise KeyError(f'No translation for language "{lang_iso}" and fallback "en" missing')
+            raise KeyError(
+                f'No translation for language "{lang_iso}" and fallback "en" missing'
+            )
         except AttributeError:
             raise KeyError(f'Module "locales.{lang_iso}" has no "translation" dict')
         self[lang_iso] = data

@@ -84,9 +84,7 @@ def generate_inline_buttons(buttons_data: buttons_data_types) -> InlineKeyboardM
             if len(button.keys()) == 1:
                 [(text, data)] = button.items()
                 if isinstance(data, str):
-                    keyboard[-1].append(
-                        InlineKeyboardButton(text, callback_data=data)
-                    )
+                    keyboard[-1].append(InlineKeyboardButton(text, callback_data=data))
                 elif isinstance(data, dict):
                     [(text, data)] = button.items()
                     if data.get("switch_inline_query_chosen_chat"):
@@ -110,13 +108,9 @@ def generate_inline_buttons(buttons_data: buttons_data_types) -> InlineKeyboardM
                             return None
                     if data.get("copy_text"):
                         if isinstance(data["copy_text"], str):
-                            data["copy_text"] = CopyTextButton(
-                                data["copy_text"]
-                            )
+                            data["copy_text"] = CopyTextButton(data["copy_text"])
                         elif isinstance(data["copy_text"], dict):
-                            data["copy_text"] = CopyTextButton(
-                                **data["copy_text"]
-                            )
+                            data["copy_text"] = CopyTextButton(**data["copy_text"])
                         else:
                             return None
                     keyboard[-1].append(InlineKeyboardButton(text=text, **data))
@@ -148,7 +142,9 @@ def generate_force_reply_buttons(buttons_data: buttons_data_types) -> ForceReply
     return ForceReply(**{} if buttons_data is None else buttons_data)
 
 
-def generate_reply_remove_buttons(buttons_data: buttons_data_types) -> ReplyKeyboardRemove:
+def generate_reply_remove_buttons(
+    buttons_data: buttons_data_types,
+) -> ReplyKeyboardRemove:
     if isinstance(buttons_data, InlineKeyboardMarkup):
         return buttons_data
     return ReplyKeyboardRemove(**{} if buttons_data is None else buttons_data)

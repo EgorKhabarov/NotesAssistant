@@ -62,8 +62,12 @@ else:
         WSGI_PATH = None
 
 ADMIN_IDS = tuple(config.get("ADMIN_IDS", ()))
-WHITE_LIST = tuple(int(x) for x in config.get("WHITE_LIST", []) or [] if x and x != "your_chat_id")
-BLACK_LIST = tuple(int(x) for x in config.get("BLACK_LIST", []) or [] if x and x != "banned_chat_id")
+WHITE_LIST = tuple(
+    int(x) for x in config.get("WHITE_LIST", []) or [] if x and x != "your_chat_id"
+)
+BLACK_LIST = tuple(
+    int(x) for x in config.get("BLACK_LIST", []) or [] if x and x != "banned_chat_id"
+)
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "

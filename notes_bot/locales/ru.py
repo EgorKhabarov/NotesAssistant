@@ -230,7 +230,7 @@ name: `<code>{}</code>`
 
 {}
 """,
-                """
+            """
 {page}) Название: `<code>{name}</code>`
      id: `<code>{group_id}</code>`
      Статус: `<code>{status}</code>`
@@ -543,17 +543,11 @@ v{config.__version__}{config.string_branch}
                     ("login", "<username> <password>"),
                     ("signup", "<email> <username> <password>"),
                 ),
-                "member": (
-                    ("start", "Старт"),
-                ),
+                "member": (("start", "Старт"),),
             },
             "-1": {
-                "user": (
-                    ("_", "Вы забанены"),
-                ),
-                "member": (
-                    ("_", "Вы забанены"),
-                ),
+                "user": (("_", "Вы забанены"),),
+                "member": (("_", "Вы забанены"),),
             },
             "0": {
                 "user": (
@@ -565,7 +559,10 @@ v{config.__version__}{config.string_branch}
                     ("forecast", "{city} Прогноз погоды на 5 дней"),
                     ("week_event_list", "События в ближайшие 7 дней"),
                     ("dice", "Кинуть кубик"),
-                    ("export", "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Помощь"),
                     ("settings", "Настройки"),
                     ("account", "Аккаунт"),
@@ -581,7 +578,10 @@ v{config.__version__}{config.string_branch}
                     ("forecast", "{city} Прогноз погоды на 5 дней"),
                     ("week_event_list", "События в ближайшие 7 дней"),
                     ("dice", "Кинуть кубик"),
-                    ("export", "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Помощь"),
                     ("settings", "Настройки"),
                 ),
@@ -596,7 +596,10 @@ v{config.__version__}{config.string_branch}
                     ("forecast", "{city} Прогноз погоды на 5 дней"),
                     ("week_event_list", "События в ближайшие 7 дней"),
                     ("dice", "Кинуть кубик"),
-                    ("export", "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Помощь"),
                     ("settings", "Настройки"),
                     ("account", "Аккаунт"),
@@ -612,7 +615,10 @@ v{config.__version__}{config.string_branch}
                     ("forecast", "{city} Прогноз погоды на 5 дней"),
                     ("week_event_list", "События в ближайшие 7 дней"),
                     ("dice", "Кинуть кубик"),
-                    ("export", "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Помощь"),
                     ("settings", "Настройки"),
                 ),
@@ -627,7 +633,10 @@ v{config.__version__}{config.string_branch}
                     ("forecast", "{city} Прогноз погоды на 5 дней"),
                     ("week_event_list", "События в ближайшие 7 дней"),
                     ("dice", "Кинуть кубик"),
-                    ("export", "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Помощь"),
                     ("settings", "Настройки"),
                     ("account", "Аккаунт"),
@@ -644,7 +653,10 @@ v{config.__version__}{config.string_branch}
                     ("forecast", "{city} Прогноз погоды на 5 дней"),
                     ("week_event_list", "События в ближайшие 7 дней"),
                     ("dice", "Кинуть кубик"),
-                    ("export", "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Сохранить мои данные в формат. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Помощь"),
                     ("settings", "Настройки"),
                     ("commands", "Список команд"),

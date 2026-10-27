@@ -86,9 +86,8 @@ if (
             return abort(403)
 
         if (
-            (secret_token := request.headers.get("X-Telegram-Bot-Api-Secret-Token", None))
-            and secret_token != config.TELEGRAM_WEBHOOK_SECRET_TOKEN
-        ):
+            secret_token := request.headers.get("X-Telegram-Bot-Api-Secret-Token", None)
+        ) and secret_token != config.TELEGRAM_WEBHOOK_SECRET_TOKEN:
             return abort(403)
 
         bot.process_new_updates([Update.de_json(request.json)])

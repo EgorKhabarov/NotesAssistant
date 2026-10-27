@@ -220,7 +220,7 @@ You have groups: {}
 
 {}
 """,
-                """
+            """
 {page}) name: `<code>{name}</code>`
      id: `<code>{group_id}</code>`
      status: `<code>{status}</code>`
@@ -534,17 +534,11 @@ Visibility <b>{}</b>m""",
                     ("login", "<username> <password>"),
                     ("signup", "<email> <username> <password>"),
                 ),
-                "member": (
-                    ("start", "Start"),
-                ),
+                "member": (("start", "Start"),),
             },
             "-1": {
-                "user": (
-                    ("_", "You are banned"),
-                ),
-                "member": (
-                    ("_", "You are banned"),
-                ),
+                "user": (("_", "You are banned"),),
+                "member": (("_", "You are banned"),),
             },
             "0": {
                 "user": (
@@ -556,7 +550,10 @@ Visibility <b>{}</b>m""",
                     ("forecast", "{city} Weather forecast for 5 days"),
                     ("week_event_list", "Weekly events"),
                     ("dice", "Roll the dice (randomizer)"),
-                    ("export", "{format} Save my data in format. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Save my data in format. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Help"),
                     ("settings", "Settings"),
                     ("account", "Account"),
@@ -572,7 +569,10 @@ Visibility <b>{}</b>m""",
                     ("forecast", "{city} Weather forecast for 5 days"),
                     ("week_event_list", "Weekly events"),
                     ("dice", "Roll the dice (randomizer)"),
-                    ("export", "{format} Save my data in format. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Save my data in format. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Help"),
                     ("settings", "Settings"),
                 ),
@@ -587,7 +587,10 @@ Visibility <b>{}</b>m""",
                     ("forecast", "{city} Weather forecast for 5 days"),
                     ("week_event_list", "Weekly events"),
                     ("dice", "Roll the dice (randomizer)"),
-                    ("export", "{format} Save my data in format. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Save my data in format. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Help"),
                     ("settings", "Settings"),
                     ("account", "Account"),
@@ -603,7 +606,10 @@ Visibility <b>{}</b>m""",
                     ("forecast", "{city} Weather forecast for 5 days"),
                     ("week_event_list", "Weekly events"),
                     ("dice", "Roll the dice (randomizer)"),
-                    ("export", "{format} Save my data in format. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Save my data in format. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Help"),
                     ("settings", "Settings"),
                 ),
@@ -618,7 +624,10 @@ Visibility <b>{}</b>m""",
                     ("forecast", "{city} Weather forecast for 5 days"),
                     ("week_event_list", "Weekly events"),
                     ("dice", "Roll the dice (randomizer)"),
-                    ("export", "{format} Save my data in format. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Save my data in format. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Help"),
                     ("settings", "Settings"),
                     ("account", "Account"),
@@ -635,7 +644,10 @@ Visibility <b>{}</b>m""",
                     ("forecast", "{city} Weather forecast for 5 days"),
                     ("week_event_list", "Weekly events"),
                     ("dice", "Roll the dice (randomizer)"),
-                    ("export", "{format} Save my data in format. (csv, xml, json, jsonl)"),
+                    (
+                        "export",
+                        "{format} Save my data in format. (csv, xml, json, jsonl)",
+                    ),
                     ("help", "Help"),
                     ("settings", "Settings"),
                     ("commands", "Command list"),

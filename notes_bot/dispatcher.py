@@ -90,7 +90,9 @@ def process_account(func):
     @wraps(func)
     def check_argument(_x: Message | CallbackQuery):
         request.set(_x)
-        is_not_in_white_list = config.WHITE_LIST and request.chat_id not in config.WHITE_LIST
+        is_not_in_white_list = (
+            config.WHITE_LIST and request.chat_id not in config.WHITE_LIST
+        )
         is_in_black_list = config.BLACK_LIST and request.chat_id in config.BLACK_LIST
         if is_not_in_white_list or is_in_black_list:
             if request.is_message:

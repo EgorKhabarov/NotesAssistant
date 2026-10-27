@@ -72,14 +72,22 @@ def telegram_log(action: str, text: str):
     thread_id = getattr(request.query, "message", request.query).message_thread_id
     thread_id_str = f":{thread_id}" if thread_id else ""
 
-    is_not_in_white_list = config.WHITE_LIST and request.chat_id not in config.WHITE_LIST
+    is_not_in_white_list = (
+        config.WHITE_LIST and request.chat_id not in config.WHITE_LIST
+    )
     is_in_black_list = config.BLACK_LIST and request.chat_id in config.BLACK_LIST
 
     if request.entity:
         request_id = request.entity.request_id
         request_chat_id = request.entity.request_chat_id
-        status = request.entity.user.user_status if request.is_user else request.entity.group.member_status if request.is_member else None
-        logger.info(f"[{entity_type}:{request_id}][{request_chat_id:<10}{thread_id_str}][{status}].{action} {text}")
+        status = (
+            request.entity.user.user_status
+            if request.is_user
+            else request.entity.group.member_status if request.is_member else None
+        )
+        logger.info(
+            f"[{entity_type}:{request_id}][{request_chat_id:<10}{thread_id_str}][{status}].{action} {text}"
+        )
     else:
         if is_not_in_white_list:
             message = f"{entity_type} Not In WHITELIST"
@@ -338,7 +346,9 @@ def fetch_weather(city: str) -> str:
     wind_speed = f"{weather['wind']['speed']:.1f}"
     wind_deg = weather["wind"]["deg"]
     wind_deg_icon = de[0 if (d := round(int(wind_deg) / 45) * 45) == 360 else d]
-    sunrise = f"{datetime.fromtimestamp(weather['sys']['sunrise'], UTC) + delta:%H:%M:%S}"
+    sunrise = (
+        f"{datetime.fromtimestamp(weather['sys']['sunrise'], UTC) + delta:%H:%M:%S}"
+    )
     sunrise = sunrise.split(" ")[-1]
     sunset = f"{datetime.fromtimestamp(weather['sys']['sunset'], UTC) + delta:%H:%M:%S}"
     sunset = sunset.split(" ")[-1]
@@ -402,12 +412,8 @@ def fetch_forecast(city: str) -> str:
     }
 
     city_timezone = timedelta(hours=weather["city"]["timezone"] // 60 // 60)
-    sunrise = (
-        datetime.fromtimestamp(weather["city"]["sunrise"], UTC) + city_timezone
-    )
-    sunset = (
-        datetime.fromtimestamp(weather["city"]["sunset"], UTC) + city_timezone
-    )
+    sunrise = datetime.fromtimestamp(weather["city"]["sunrise"], UTC) + city_timezone
+    sunset = datetime.fromtimestamp(weather["city"]["sunset"], UTC) + city_timezone
     result = f"{weather['city']['name']}\n☀ {sunrise:%Y.%m.%d %H:%M:%S}\n🌑 {sunset:%Y.%m.%d %H:%M:%S}"
 
     for hour in weather["list"]:
