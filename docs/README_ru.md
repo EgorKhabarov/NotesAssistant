@@ -8,9 +8,9 @@
 [![Python versions](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FEgorKhabarov%2FNotesAssistant%2Frefs%2Fheads%2Fmaster%2F.github%2Fworkflows%2Ftests.yml&search=python-version%3A%5Cs*%5C%5B%5Cs*%22(%5B%5E%22%5D%2B)%22%5B%5Cs%5CS%5D*%22(%5B%5E%22%5D%2B)%22%5Cs*%2C%3F%5Cs*%5C%5D&replace=%241%20...%20%242&flags=m&label=Python%20supported%20versions)](https://github.com/EgorKhabarov/NotesAssistant/blob/master/.github/workflows/tests.yml)
 
 [![Telegram](https://egorkhabarov.github.io/resources/badges/Telegram.svg)](https://t.me/NotesAssistantBot)
-[![UptimeRobot Status](https://img.shields.io/uptimerobot/status/m796658291-a3b1e18d0d9b2662434240e6)](https://uptimerobot.com/)
+[![UptimeRobot Status](https://img.shields.io/uptimerobot/status/m796658291-a3b1e18d0d9b2662434240e6?label=Status)](https://stats.uptimerobot.com/nnzZydRcVY)
 
-# NotesAssistant
+# <p align="center">NotesAssistant
 ### Бот для организации заметок в Telegram
 Хранение, добавление, редактирование и удаление заметки по дате.
 Можно пометить заметку с помощью эмодзи.
