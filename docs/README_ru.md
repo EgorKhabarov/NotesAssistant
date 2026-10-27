@@ -3,7 +3,7 @@
     <td><a href="/docs/README_ru.md">RU</a></td>
 </table>
 
-[![GitHub Actions Workflow Status](https://github.com/EgorKhabarov/TODO-bot/actions/workflows/tests.yml/badge.svg)](https://github.com/EgorKhabarov/TODO-bot/actions/workflows/tests.yml)
+[![GitHub Actions Workflow Status](https://github.com/EgorKhabarov/NotesAssistant/actions/workflows/tests.yml/badge.svg)](https://github.com/EgorKhabarov/NotesAssistant/actions/workflows/tests.yml)
 [![NotesAssistant \_\_version\_\_](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FEgorKhabarov%2FNotesAssistant%2Frefs%2Fheads%2Fmaster%2Fconfig.py&search=__version__%5Cs*%3D%5Cs*%22(%5B%5E%22%5D%2B)%22&replace=%241&flags=m&label=NotesAssistant%20version)](https://github.com/EgorKhabarov/NotesAssistant/blob/master/config.py)
 [![Python versions](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fraw.githubusercontent.com%2FEgorKhabarov%2FNotesAssistant%2Frefs%2Fheads%2Fmaster%2F.github%2Fworkflows%2Ftests.yml&search=python-version%3A%5Cs*%5C%5B%5Cs*%22(%5B%5E%22%5D%2B)%22%5B%5Cs%5CS%5D*%22(%5B%5E%22%5D%2B)%22%5Cs*%2C%3F%5Cs*%5C%5D&replace=%241%20...%20%242&flags=m&label=Python%20supported%20versions)](https://github.com/EgorKhabarov/NotesAssistant/blob/master/.github/workflows/tests.yml)
 
