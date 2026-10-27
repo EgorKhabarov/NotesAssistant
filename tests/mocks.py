@@ -1,5 +1,5 @@
 # noinspection PyPackageRequirements
-from telebot.types import Message, CallbackQuery, User, Chat
+from telebot.types import CallbackQuery, Chat, Message, User
 
 
 def message_mock(message_id: int, text: str, html_text=None) -> Message:
@@ -32,10 +32,12 @@ def message_mock(message_id: int, text: str, html_text=None) -> Message:
 
 
 def callback_mock(
-    data: str, message: Message = message_mock(1, "message text")
+    data: str, message: Message | None = None
 ) -> CallbackQuery:
+    if message is None:
+        message = message_mock(1, "message text")
     return CallbackQuery(
-        id=100,
+        id=100,  # TODO int -> str
         from_user=User(
             id=1,
             is_bot=False,
@@ -48,5 +50,5 @@ def callback_mock(
         chat_instance="",
         json_string="",
         message=message,
-        inline_message_id=100,
+        inline_message_id=100,  # TODO int -> str
     )

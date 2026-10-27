@@ -1,7 +1,7 @@
 import re
 from typing import Any
 
-from telegram_utils.argument_parser import get_arguments, _data_types
+from telegram_utils.argument_parser import _DataTypes, get_arguments
 
 
 class __CommandRegex:
@@ -31,7 +31,7 @@ command_regex = __CommandRegex()
 
 
 def get_command_arguments(
-    message: str, arguments: dict[str, _data_types | tuple[_data_types, Any]]
+    message: str, arguments: dict[str, _DataTypes | tuple[_DataTypes, Any]]
 ) -> dict[str, Any]:
     """
     >>> try: get_command_arguments("", {"arg1": "long str", "arg2": "str"})
@@ -81,7 +81,7 @@ def get_command_arguments(
 
 
 def parse_command(
-    message: str, arguments: dict[str, _data_types | tuple[_data_types, Any]]
+    message: str, arguments: dict[str, _DataTypes | tuple[_DataTypes, Any]]
 ) -> dict[str, Any]:
     """
     >>> try: parse_command("", {"arg1": "long str", "arg2": "str"})

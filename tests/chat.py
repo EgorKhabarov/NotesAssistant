@@ -1,18 +1,18 @@
 import os
-from pprint import pformat
-from pathlib import Path
+from collections.abc import Callable
 
 # noinspection PyPackageRequirements
 from contextvars import ContextVar
+from pathlib import Path
+from pprint import pformat
+
+from sqlalchemy import create_engine
 
 # noinspection PyPackageRequirements
 from telebot import apihelper, util
 
 # noinspection PyPackageRequirements
-from telebot.types import Message, CallbackQuery
-
-from typing import Callable
-from sqlalchemy import create_engine
+from telebot.types import CallbackQuery, Message
 
 import config
 import notes_api.types
@@ -145,15 +145,15 @@ config.SQLALCHEMY_DATABASE_URI = f"sqlite:///{test_database_path}"
 notes_api.types.engine = create_engine(config.SQLALCHEMY_DATABASE_URI, echo=False)
 notes_api.types.db = notes_api.types.DataBase()
 
-from notes_api.db_creator import create_tables  # noqa: E402
+from notes_api.db_creator import create_tables
 
 create_tables()
 history.set([])
 
-if True:  # noqa: E402  # import not at top of file
+if True:
     from notes_api.types import create_user, get_account_from_password
     from notes_bot.request import request
-    from notes_bot.types import set_user_telegram_chat_id, TelegramAccount
+    from notes_bot.types import TelegramAccount, set_user_telegram_chat_id
 
 with notes_api.types.db.connect():
     create_user("example@gmail.com", "example_username", "example_password")

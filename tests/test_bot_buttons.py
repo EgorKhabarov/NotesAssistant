@@ -1,12 +1,11 @@
 from tests.chat import Chat, setup_request
 
 with Chat():
-    from notes_bot.request import request
-    from tests.mocks import callback_mock, message_mock
-    from notes_bot.handlers import callback_handler
-
     # from notes_api.types import set_user_status
     from notes_api.exceptions import NotEnoughPermissions
+    from notes_bot.handlers import callback_handler
+    from notes_bot.request import request
+    from tests.mocks import callback_mock, message_mock
 
 
 def test_bot_callback_mnm():

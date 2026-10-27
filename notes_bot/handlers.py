@@ -1,119 +1,119 @@
-import re
 import html
 import inspect
+import re
 import traceback
-from functools import wraps
 from ast import literal_eval
+from collections.abc import Callable
 from datetime import datetime
-from typing import Callable, Literal
+from functools import wraps
+from typing import Literal
 
 # noinspection PyPackageRequirements
 from telebot.apihelper import ApiTelegramException
 
 # noinspection PyPackageRequirements
-from telebot.types import Message, CallbackQuery
+from telebot.types import CallbackQuery, Message
 
 import config
-from notes_bot.bot import bot
-from notes_bot.request import request
-from notes_bot.time_utils import now_time_calendar
-from notes_bot.bot_actions import delete_message_action
-from notes_bot.lang import get_translate, get_theme_emoji
-from notes_bot.message_generator import (
-    ChatAction,
-    TextMessage,
-    CallBackAnswer,
-    DocumentMessage,
-)
-from notes_bot.buttons_utils import (
-    delmarkup,
-    encode_id,
-    decode_id,
-    create_yearly_calendar_keyboard,
-    create_monthly_calendar_keyboard,
-    create_twenty_year_calendar_keyboard,
-    create_frequently_used_dates_keyboard,
-)
-from notes_bot.bot_messages import (
-    menu_message,
-    help_message,
-    open_message,
-    start_message,
-    event_message,
-    group_message,
-    daily_message,
-    limits_message,
-    groups_message,
-    events_message,
-    account_message,
-    settings_message,
-    trash_can_message,
-    select_one_message,
-    about_event_message,
-    event_status_message,
-    notification_message,
-    delete_group_message,
-    event_history_message,
-    select_events_message,
-    search_filter_message,
-    search_filters_message,
-    search_results_message,
-    edit_event_date_message,
-    event_show_mode_message,
-    week_event_list_message,
-    recurring_events_message,
-    monthly_calendar_message,
-    edit_events_date_message,
-    before_event_delete_message,
-    before_events_delete_message,
-    frequently_used_dates_settings_message,
-)
-from notes_bot.types import (
-    TelegramAccount,
-    set_user_telegram_chat_id,
-    get_telegram_account_from_password,
-)
-from notes_bot.utils import (
-    fetch_weather,
-    fetch_forecast,
-    is_secure_chat,
-    html_to_markdown,
-    set_bot_commands,
-    add_group_pattern,
-    extract_search_query,
-    re_user_login_message,
-    re_user_signup_message,
-    extract_search_filters,
-    generate_search_sql_condition,
-)
 from notes_api.exceptions import (
     ApiError,
-    WrongDate,
-    TextIsTooBig,
-    UserNotFound,
-    StatusRepeats,
     EventNotFound,
     LimitExceeded,
+    NotEnoughPermissions,
     NotGroupMember,
     NotUniqueEmail,
     NotUniqueUsername,
     StatusLengthExceeded,
-    NotEnoughPermissions,
+    StatusRepeats,
+    TextIsTooBig,
+    UserNotFound,
+    WrongDate,
 )
-from notes_api.logger import logger
 from notes_api.log_cleaner import clear_logs
-from notes_api.utils import is_valid_year, re_username
+from notes_api.logger import logger
 from notes_api.types import (
     Account,
     ChatStateMachine,
     create_user,
-    set_user_status,
     get_account_from_password,
+    set_user_status,
+)
+from notes_api.utils import is_valid_year, re_username
+from notes_bot.bot import bot
+from notes_bot.bot_actions import delete_message_action
+from notes_bot.bot_messages import (
+    about_event_message,
+    account_message,
+    before_event_delete_message,
+    before_events_delete_message,
+    daily_message,
+    delete_group_message,
+    edit_event_date_message,
+    edit_events_date_message,
+    event_history_message,
+    event_message,
+    event_show_mode_message,
+    event_status_message,
+    events_message,
+    frequently_used_dates_settings_message,
+    group_message,
+    groups_message,
+    help_message,
+    limits_message,
+    menu_message,
+    monthly_calendar_message,
+    notification_message,
+    open_message,
+    recurring_events_message,
+    search_filter_message,
+    search_filters_message,
+    search_results_message,
+    select_events_message,
+    select_one_message,
+    settings_message,
+    start_message,
+    trash_can_message,
+    week_event_list_message,
+)
+from notes_bot.buttons_utils import (
+    create_frequently_used_dates_keyboard,
+    create_monthly_calendar_keyboard,
+    create_twenty_year_calendar_keyboard,
+    create_yearly_calendar_keyboard,
+    decode_id,
+    delmarkup,
+    encode_id,
+)
+from notes_bot.lang import get_theme_emoji, get_translate
+from notes_bot.message_generator import (
+    CallBackAnswer,
+    ChatAction,
+    DocumentMessage,
+    TextMessage,
+)
+from notes_bot.request import request
+from notes_bot.time_utils import now_time_calendar
+from notes_bot.types import (
+    TelegramAccount,
+    get_telegram_account_from_password,
+    set_user_telegram_chat_id,
+)
+from notes_bot.utils import (
+    add_group_pattern,
+    extract_search_filters,
+    extract_search_query,
+    fetch_forecast,
+    fetch_weather,
+    generate_search_sql_condition,
+    html_to_markdown,
+    is_secure_chat,
+    re_user_login_message,
+    re_user_signup_message,
+    set_bot_commands,
 )
 from telegram_utils.argument_parser import getargs
-from telegram_utils.buttons_generator import generate_buttons, edit_button_data
-from telegram_utils.command_parser import parse_command, get_command_arguments
-
+from telegram_utils.buttons_generator import edit_button_data, generate_inline_buttons
+from telegram_utils.command_parser import get_command_arguments, parse_command
 
 add_event_state = ChatStateMachine("add_event")
 add_group_state = ChatStateMachine("add_group")
@@ -129,7 +129,7 @@ def not_login_handler(x: CallbackQuery | Message) -> None:
     except ApiTelegramException:
         pass
 
-    message = x if isinstance(x, Message) else x.message
+    message: Message = x if isinstance(x, Message) else x.message
 
     if isinstance(x, CallbackQuery) and x.data == "md":
         delete_message_action(message)
@@ -145,7 +145,7 @@ def not_login_handler(x: CallbackQuery | Message) -> None:
             "user.signup\nemail: \nusername: \npassword: "
         )
     }
-    markup = generate_buttons(
+    markup = generate_inline_buttons(
         [[{"/login": button_login}], [{"/signup": button_signup}]]
     )
 
@@ -478,9 +478,9 @@ _handlers = {}
 
 def prefix(
     prefix_: str | tuple[str, ...],
-    arguments: dict = None,
-    eval_: bool = None,
-    eval_star: bool = None,
+    arguments: dict | None = None,
+    eval_: bool | None = None,
+    eval_star: bool | None = None,
 ):
     if isinstance(prefix_, str):
         prefix_: tuple[str] = (prefix_,)
@@ -666,8 +666,8 @@ class CallBackHandler:
         send_event_text = get_translate("text.send_event_text")
         CallBackAnswer(send_event_text).answer()
         text = f"{message.html_text}\n\n<b>?.?.</b>⬜\n{send_event_text}"
-        markup = generate_buttons([[{get_theme_emoji("back"): f"dl {date}"}]])
-        TextMessage(text, markup).edit()
+        markup = [[{get_theme_emoji("back"): f"dl {date}"}]]
+        TextMessage(text, generate_inline_buttons(markup)).edit()
 
     @prefix(
         "es", {"statuses": "str", "folder": "str", "event_id": "int", "date": "str"}
@@ -851,7 +851,7 @@ class CallBackHandler:
             generated = daily_message(date)
             generated.edit()
             CallBackAnswer(get_translate("errors.error")).answer()
-            return None
+            return
 
         generated = event_history_message(event_id, date, 1, 0)
         try:
@@ -1544,9 +1544,9 @@ class CallBackHandler:
                 "mna",
             )
             generated.edit()
-            return None
+            return
         limits_message(date).edit(disable_web_page_preview=False)
-        return None
+        return
 
     @prefix("grcr")
     def group_create(self, message_id: int):
@@ -1557,8 +1557,8 @@ class CallBackHandler:
 
         cache_create_group(str(message_id))
         text = get_translate("text.create_group")
-        markup = generate_buttons([[{get_theme_emoji("back"): "mngrs"}]])
-        TextMessage(text, markup).edit()
+        markup = [[{get_theme_emoji("back"): "mngrs"}]]
+        TextMessage(text, generate_inline_buttons(markup)).edit()
         CallBackAnswer(get_translate("text.send_group_name")).answer()
         return None
 
@@ -1595,7 +1595,7 @@ class CallBackHandler:
         export_status = self.group_export(group_id, "csv", False)
 
         if export_status == 2:
-            return None
+            return
 
         if export_status == 3:
             TextMessage(get_translate("errors.export_empty"), delmarkup()).send()

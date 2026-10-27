@@ -1,25 +1,24 @@
-from io import StringIO
 from copy import deepcopy
 from datetime import datetime
+from io import StringIO
 from typing import Any
 
 # noinspection PyPackageRequirements
 from telebot.apihelper import ApiTelegramException
 
 # noinspection PyPackageRequirements
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, Message, InputFile
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup, InputFile, Message
 
 import config
-from notes_bot.bot import bot
-from notes_bot.request import request
-from notes_bot.lang import get_translate
-from notes_bot.time_utils import relatively_string_date
-from notes_bot.buttons_utils import encode_id, number_to_power
-from notes_bot.utils import add_status_effect, get_message_thread_id
+from notes_api.exceptions import DataBaseError, EventNotFound
 from notes_api.logger import logger
-from notes_api.types import db, Event
-from notes_api.exceptions import EventNotFound, DataBaseError
-
+from notes_api.types import Event, db
+from notes_bot.bot import bot
+from notes_bot.buttons_utils import encode_id, number_to_power
+from notes_bot.lang import get_translate
+from notes_bot.request import request
+from notes_bot.time_utils import relatively_string_date
+from notes_bot.utils import add_status_effect, get_message_thread_id
 
 event_formats = {
     "dl": "<b>{numd}.{event_id}.</b>{statuses}\n{markdown_text}\n",
@@ -331,7 +330,7 @@ class EventsMessage(TextMessage):
     def __init__(
         self,
         date: str = "now",
-        event_list: tuple | list[Event, ...] = tuple(),
+        event_list: tuple | list[Event, ...] = (),
         markup: InlineKeyboardMarkup | None = None,
         page: int = 0,
         page_indent: int = 0,
@@ -346,7 +345,7 @@ class EventsMessage(TextMessage):
         self._date = date
         self.page = page
         self.page_indent = page_indent
-        self.page_signature_needed = True if page else False
+        self.page_signature_needed = bool(page)
 
     def get_pages_data(
         self,

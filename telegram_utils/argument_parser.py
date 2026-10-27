@@ -1,8 +1,8 @@
-from typing import Any, Literal, TypeAlias, Callable
+from collections.abc import Callable
 from datetime import datetime
+from typing import Any, Literal, TypeAlias
 
-
-_data_types: TypeAlias = (
+_DataTypes: TypeAlias = (
     str
     | Literal[
         "str",
@@ -12,12 +12,12 @@ _data_types: TypeAlias = (
         "long str",
     ]
 )
-_return_types: TypeAlias = str | int | float | datetime | list[int] | None
+_ReturnTypes: TypeAlias = str | int | float | datetime | list[int] | None
 
 
 def get_arguments(
-    text: str, arguments: dict[str, _data_types | tuple[_data_types, Any]]
-) -> dict[str, _return_types]:
+    text: str, arguments: dict[str, _DataTypes | tuple[_DataTypes, Any]]
+) -> dict[str, _ReturnTypes]:
     """
     >>> try: get_arguments("", {"arg1": "long str", "arg2": "str"})
     ... except SyntaxError as e: str(e)
@@ -113,8 +113,8 @@ def get_arguments(
 
 
 def __process_value(
-    arg_type: _data_types, value: str, default: Any = None
-) -> _return_types | None:
+    arg_type: _DataTypes, value: str, default: Any = None
+) -> _ReturnTypes | None:
     match arg_type:
         case "str":
             return value
@@ -141,11 +141,11 @@ def __process_value(
 def getargs(
     text: str,
 ) -> Callable[
-    [dict[str, _data_types | tuple[_data_types, Any]]], dict[str, _return_types]
+    [dict[str, _DataTypes | tuple[_DataTypes, Any]]], dict[str, _ReturnTypes]
 ]:
     def closure(
-        arg: dict[str, _data_types | tuple[_data_types, Any]],
-    ) -> dict[str, _return_types]:
+        arg: dict[str, _DataTypes | tuple[_DataTypes, Any]],
+    ) -> dict[str, _ReturnTypes]:
         return get_arguments(text, arg)
 
     return closure

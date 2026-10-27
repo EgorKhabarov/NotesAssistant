@@ -4,13 +4,12 @@ from calendar import monthcalendar
 from telebot.types import InlineKeyboardMarkup
 
 import config
-from notes_bot.request import request
-from notes_bot.lang import get_translate, get_theme_emoji
-from notes_bot.time_utils import now_time_calendar, year_info, get_week_number
 from notes_api.types import db
-from notes_api.utils import is_valid_year, chunks, sqlite_format_date
-from telegram_utils.buttons_generator import generate_buttons
-
+from notes_api.utils import chunks, is_valid_year, sqlite_format_date
+from notes_bot.lang import get_theme_emoji, get_translate
+from notes_bot.request import request
+from notes_bot.time_utils import get_week_number, now_time_calendar, year_info
+from telegram_utils.buttons_generator import generate_inline_buttons
 
 # alphabet = "0123456789aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ"
 # alphabet = "".join(chr(i) for i in range(33, 126)).replace(",", "")
@@ -198,7 +197,7 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
             {"🗂": f"cmf ({command},{back},{year},{month},{arguments})"},
         ],
     ]
-    return generate_buttons(markup)
+    return generate_inline_buttons(markup)
 
 
 def create_yearly_calendar_keyboard(
@@ -328,7 +327,7 @@ SELECT date
             {"🗂": f"cyf ({command},{back},{year},{arguments})"},
         ],
     ]
-    return generate_buttons(markup)
+    return generate_inline_buttons(markup)
 
 
 def create_twenty_year_calendar_keyboard(
@@ -419,28 +418,26 @@ SELECT 1
             }
             years_buttons[-1].append({f"{tag_today}{numY}{tag_event}{tag_birthday}": button_data})
 
-    markup = generate_buttons(
+    markup = [
+        *years_buttons,
         [
-            *years_buttons,
-            [
-                {text: f"ct ({command},{back},{year},{arguments})"}
-                for text, year in {
-                    "<<": str(int(f"{millennium}{decade}") - 2)[:3],
-                    "⟳": "'now'",
-                    ">>": str(int(f"{millennium}{decade}") + 2)[:3],
-                }.items()
-            ],
-            [
-                (
-                    {get_theme_emoji("back"): f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"}
-                    if back
-                    else {}
-                ),
-                {"🗂": f"ctf ({command},{back},{millennium}{decade},{arguments})"},
-            ],
-        ]
-    )
-    return markup
+            {text: f"ct ({command},{back},{year},{arguments})"}
+            for text, year in {
+                "<<": str(int(f"{millennium}{decade}") - 2)[:3],
+                "⟳": "'now'",
+                ">>": str(int(f"{millennium}{decade}") + 2)[:3],
+            }.items()
+        ],
+        [
+            (
+                {get_theme_emoji("back"): f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"}
+                if back
+                else {}
+            ),
+            {"🗂": f"ctf ({command},{back},{millennium}{decade},{arguments})"},
+        ],
+    ]
+    return generate_inline_buttons(markup)
 
 
 def create_frequently_used_dates_keyboard(
@@ -472,7 +469,7 @@ def create_frequently_used_dates_keyboard(
 
     back_data = f"{prefix} ({command},{back},{string_data},{arguments})"
     markup.append([{get_theme_emoji("back"): back_data}])
-    return generate_buttons(markup)
+    return generate_inline_buttons(markup)
 
 
 def create_select_status_keyboard(
@@ -506,42 +503,40 @@ def create_select_status_keyboard(
         buttons_data: tuple[tuple[tuple[str]]] = get_translate(
             "buttons.select_status.folders"
         )
-        markup = generate_buttons(
-            [
-                *[
-                    [
-                        {f"{title:{config.ts}<80}": f"{prefix} {string_statuses} {folder} {arguments}"}
-                        for (title, folder) in row
-                    ]
-                    for row in buttons_data
-                ],
-                (
-                    [
-                        {
-                            (rm_status if rm_status else " "): (
-                                f"{prefix} {join(filter(lambda x: x != rm_status, status_list)) or '⬜'} "
-                                f"folders {arguments}"
-                                if rm_status
-                                else "None"
-                            )
-                        }
-                        for rm_status in status_list + [""] * (5 - len(status_list))
-                    ]
-                    if status_list != ["⬜"]
-                    else ({" ": "None"},) * 5
-                ),
+        markup = [
+            *[
+                [
+                    {f"{title:{config.ts}<80}": f"{prefix} {string_statuses} {folder} {arguments}"}
+                    for (title, folder) in row
+                ]
+                for row in buttons_data
+            ],
+            (
                 [
                     {
-                        get_theme_emoji("back"): (
-                            f"{back} {arguments}"
-                            if updated
-                            else f"{back} {string_statuses} folders {arguments}"
+                        (rm_status if rm_status else " "): (
+                            f"{prefix} {join(filter(lambda x: x != rm_status, status_list)) or '⬜'} "
+                            f"folders {arguments}"
+                            if rm_status
+                            else "None"
                         )
-                    },
-                    {"💾": f"{save} {arguments} {string_statuses}"},
-                ],
-            ]
-        )
+                    }
+                    for rm_status in status_list + [""] * (5 - len(status_list))
+                ]
+                if status_list != ["⬜"]
+                else ({" ": "None"},) * 5
+            ),
+            [
+                {
+                    get_theme_emoji("back"): (
+                        f"{back} {arguments}"
+                        if updated
+                        else f"{back} {string_statuses} folders {arguments}"
+                    )
+                },
+                {"💾": f"{save} {arguments} {string_statuses}"},
+            ],
+        ]
     else:
         buttons_data: tuple[tuple[str]] = get_translate(f"buttons.select_status.{folder_path}")
 
@@ -560,20 +555,18 @@ def create_select_status_keyboard(
             res_status = ",".join(list(dict.fromkeys(status_list + [new_status])))
             return f"{prefix} {res_status} folders {arguments}"
 
-        markup = generate_buttons(
-            [
-                *[
-                    [
-                        {f"{row:{config.ts}<80}": unique_string_statuses(row)}
-                        for row in status_column
-                    ]
-                    for status_column in buttons_data
-                ],
-                [{get_theme_emoji("back"): f"{prefix} {string_statuses} folders {arguments}"}],
-            ]
-        )
+        markup = [
+            *[
+                [
+                    {f"{row:{config.ts}<80}": unique_string_statuses(row)}
+                    for row in status_column
+                ]
+                for status_column in buttons_data
+            ],
+            [{get_theme_emoji("back"): f"{prefix} {string_statuses} folders {arguments}"}],
+        ]
 
-    return markup
+    return generate_inline_buttons(markup)
 
 
 def edit_button_attrs(
@@ -585,7 +578,7 @@ def edit_button_attrs(
 
 
 def delmarkup() -> InlineKeyboardMarkup:
-    return generate_buttons([[{get_theme_emoji("del"): "md"}]])
+    return generate_inline_buttons([[{get_theme_emoji("del"): "md"}]])
 
 
 def number_to_power(string: str) -> str:

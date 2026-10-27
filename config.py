@@ -4,7 +4,6 @@ from pathlib import Path
 import git
 import yaml
 
-
 config_path = "config.yaml"
 
 if not Path(config_path).exists():

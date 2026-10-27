@@ -1,11 +1,12 @@
-import requests
 from threading import Thread
 
+import requests
+
 import config
-from notes_bot.main import bot
-from notes_bot.background_loop import start_background_loop
-from notes_bot.bot import bot_webhook_info, bot_log_info
 from notes_api.logger import logger
+from notes_bot.background_loop import start_background_loop
+from notes_bot.bot import bot_log_info, bot_webhook_info
+from notes_bot.main import bot
 
 
 def start_bot():

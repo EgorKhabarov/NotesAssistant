@@ -1,75 +1,73 @@
-import re
-import json
-import html
 import difflib
+import html
+import json
+import re
+from datetime import UTC, datetime, timedelta
 from typing import Literal
-from datetime import timedelta, datetime, timezone
-
-# noinspection PyPackageRequirements
-from telebot.apihelper import ApiTelegramException
 
 # noinspection PyPackageRequirements
 from telebot import formatting
 
 # noinspection PyPackageRequirements
+from telebot.apihelper import ApiTelegramException
+
+# noinspection PyPackageRequirements
 from telebot.types import InlineKeyboardButton, Message
 
 import config
-from notes_bot.bot import bot
-from notes_bot.request import request
-from notes_bot.limits import get_limit_link
-from notes_bot.time_utils import parse_utc_datetime
-from notes_bot.bot_actions import delete_message_action
-from notes_bot.lang import get_translate, get_theme_emoji, translation
-from notes_bot.types import TelegramAccount, TelegramSettings
-from notes_bot.message_generator import (
-    TextMessage,
-    EventMessage,
-    EventsMessage,
-    event_formats,
-)
-from notes_bot.buttons_utils import (
-    delmarkup,
-    encode_id,
-    decode_id,
-    create_select_status_keyboard,
-    create_yearly_calendar_keyboard,
-    create_monthly_calendar_keyboard,
-)
-from notes_bot.utils import (
-    Cycle,
-    re_edit_message,
-    html_to_markdown,
-    sqlite_format_date2,
-    extract_search_query,
-    extract_search_filters,
-    highlight_text_difference,
-    generate_search_sql_condition,
-)
+from notes_api.exceptions import ApiError, EventNotFound, GroupNotFound, UserNotFound
 from notes_api.logger import logger
 from notes_api.types import db, group_limits
-from notes_api.utils import sqlite_format_date, is_valid_year, chunks
-from notes_api.exceptions import EventNotFound, GroupNotFound, UserNotFound, ApiError
-from telegram_utils.buttons_generator import generate_buttons, edit_button_data
+from notes_api.utils import chunks, is_valid_year, sqlite_format_date
+from notes_bot.bot import bot
+from notes_bot.bot_actions import delete_message_action
+from notes_bot.buttons_utils import (
+    create_monthly_calendar_keyboard,
+    create_select_status_keyboard,
+    create_yearly_calendar_keyboard,
+    decode_id,
+    delmarkup,
+    encode_id,
+)
+from notes_bot.lang import get_theme_emoji, get_translate, translation
+from notes_bot.limits import get_limit_link
+from notes_bot.message_generator import (
+    EventMessage,
+    EventsMessage,
+    TextMessage,
+    event_formats,
+)
+from notes_bot.request import request
+from notes_bot.time_utils import parse_utc_datetime
+from notes_bot.types import TelegramAccount, TelegramSettings
+from notes_bot.utils import (
+    Cycle,
+    extract_search_filters,
+    extract_search_query,
+    generate_search_sql_condition,
+    highlight_text_difference,
+    html_to_markdown,
+    re_edit_message,
+    sqlite_format_date2,
+)
+from telegram_utils.buttons_generator import edit_button_data, generate_inline_buttons
 
 
 def start_message() -> TextMessage:
     text = get_translate("messages.start")
 
-    markup = generate_buttons(
+    markup = [
         [
-            [
-                (
-                    {"Сменить язык на русский": "stl ru"}
-                    if request.entity.settings.lang == "en"
-                    else {"Change language to English": "stl en"}
-                )
-            ],
-            [{"/menu": "mnm"}],
-            [{"/calendar": "mnc ('now',)"}],
-        ]
-    )
-    return TextMessage(text, markup)
+            (
+                {"Сменить язык на русский": "stl ru"}
+                if request.entity.settings.lang == "en"
+                else {"Change language to English": "stl en"}
+            )
+        ],
+        [{"/menu": "mnm"}],
+        [{"/calendar": "mnc ('now',)"}],
+    ]
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def menu_message() -> TextMessage:
@@ -121,7 +119,7 @@ def menu_message() -> TextMessage:
             {f"👥 {translate_group}": "mngr self"} if request.is_member else {},
         ],
     ]
-    return TextMessage(text, generate_buttons(markup))
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def settings_message(
@@ -284,32 +282,30 @@ def settings_message(
     def commit_changes(command):
         return format_call_data(prefix="stuc") if updated else command
 
-    markup = generate_buttons(
+    markup = [
         [
-            [
-                {f"🗣 {new_lang}": format_call_data(lang_=new_lang)},
-                {f"🔗 {new_sub_urls_string}": format_call_data(sub_urls_=new_sub_urls)},
-                {
-                    new_notifications_emoji: format_call_data(
-                        notifications_=new_notifications_type
-                    )
-                },
-                {new_theme_emoji: format_call_data(theme_=new_theme_id)},
-            ],
-            timezone_row,
-            notifications_time_row,
-            [{get_translate("text.restore_to_default"): "std"}],
-            [
-                {get_theme_emoji("back"): commit_changes("mnm")},
-                {"🗂": commit_changes("frd")},
-                {"💾": {
-                    "callback_data": format_call_data(prefix="sts"),
-                    "style": "danger" if commit else "primary" if updated else None,
-                }},
-            ],
-        ]
-    )
-    return TextMessage(text, markup)
+            {f"🗣 {new_lang}": format_call_data(lang_=new_lang)},
+            {f"🔗 {new_sub_urls_string}": format_call_data(sub_urls_=new_sub_urls)},
+            {
+                new_notifications_emoji: format_call_data(
+                    notifications_=new_notifications_type
+                )
+            },
+            {new_theme_emoji: format_call_data(theme_=new_theme_id)},
+        ],
+        timezone_row,
+        notifications_time_row,
+        [{get_translate("text.restore_to_default"): "std"}],
+        [
+            {get_theme_emoji("back"): commit_changes("mnm")},
+            {"🗂": commit_changes("frd")},
+            {"💾": {
+                "callback_data": format_call_data(prefix="sts"),
+                "style": "danger" if commit else "primary" if updated else None,
+            }},
+        ],
+    ]
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def frequently_used_dates_settings_message(
@@ -331,17 +327,16 @@ def frequently_used_dates_settings_message(
     if len(buttons_data) == 0:
         buttons_data.append([{get_translate("errors.message_empty"): "None"}])
 
+    markup = [
+        *buttons_data,
+        [
+            {get_theme_emoji("back"): "mns"},
+            {"🔄": "frd"},
+        ],
+    ]
     return TextMessage(
         get_translate("messages.frequently_used_dates"),
-        markup=generate_buttons(
-            [
-                *buttons_data,
-                [
-                    {get_theme_emoji("back"): "mns"},
-                    {"🔄": "frd"},
-                ],
-            ]
-        ),
+        markup=generate_inline_buttons(markup),
     )
 
 
@@ -364,7 +359,7 @@ def help_message(
             get_theme_emoji("back") + k.removeprefix("🔙") if k.startswith("🔙") else k
         )
         last_button[new_k] = v
-        markup = generate_buttons(keyboard)
+        markup = generate_inline_buttons(keyboard)
         generated = TextMessage(f"{title}\n{text}", markup)
     else:
         markup = None
@@ -408,23 +403,21 @@ AND removal_time IS NULL
     yesterday = f"dl {y:%d.%m.%Y}" if is_valid_year(y.year) else "None"
     tomorrow = f"dl {t:%d.%m.%Y}" if is_valid_year(t.year) else "None"
 
-    markup = generate_buttons(
+    markup = [
         [
-            [
-                {get_theme_emoji("add"): f"ea {date:%d.%m.%Y}"},
-                {"🔼": "None"},
-                {"↕️": "None"},
-                {"Menu": "mnm"},
-            ],
-            [
-                {get_theme_emoji("back"): f"mnc (({date:%Y},{int(date.month)}),)"},
-                {"<": yesterday},
-                {">": tomorrow},
-                {"🔄": f"dl {date:%d.%m.%Y}"},
-            ],
-        ]
-    )
-    generated = EventsMessage(f"{date:%d.%m.%Y}", markup=markup, page=page)
+            {get_theme_emoji("add"): f"ea {date:%d.%m.%Y}"},
+            {"🔼": "None"},
+            {"↕️": "None"},
+            {"Menu": "mnm"},
+        ],
+        [
+            {get_theme_emoji("back"): f"mnc (({date:%Y},{int(date.month)}),)"},
+            {"<": yesterday},
+            {">": tomorrow},
+            {"🔄": f"dl {date:%d.%m.%Y}"},
+        ],
+    ]
+    generated = EventsMessage(f"{date:%d.%m.%Y}", markup=generate_inline_buttons(markup), page=page)
 
     if id_list:
         generated.get_page_events(sql_where, params, id_list, "day")
@@ -567,7 +560,7 @@ def event_message(
     generated.format(
         f"{get_translate('select.what_do_with_event')}:",
         event_formats[format_key],
-        generate_buttons(markup),
+        generate_inline_buttons(markup),
     )
     return generated
 
@@ -625,7 +618,7 @@ AND removal_time IS {'NOT' if is_in_wastebasket else ''} NULL
         args=event_formats[args_key],
         if_empty=get_translate("errors.message_empty"),
     )
-    generated.markup = generate_buttons(markup)
+    generated.markup = generate_inline_buttons(markup)
     return generated
 
 
@@ -644,10 +637,11 @@ def about_event_message(event_id: int) -> EventMessage | None:
 {parse_utc_datetime(event.recent_changes_time)} - {time_last_changes}
 """
     event.text = formatting.hpre(text.strip(), language="language-event-metadata")
+    markup = [[{get_theme_emoji("back"): f"em {event_id}"}]]
     generated.format(
         f"{title}:",
         event_formats["a"],
-        generate_buttons([[{get_theme_emoji("back"): f"em {event_id}"}]]),
+        generate_inline_buttons(markup),
     )
     return generated
 
@@ -658,10 +652,11 @@ def event_show_mode_message(event_id: int) -> EventMessage | None:
     if not event:
         return None
 
+    markup = [[{get_theme_emoji("back"): f"em {event_id}"}]]
     generated.format(
         "",
         event_formats["s"],
-        generate_buttons([[{get_theme_emoji("back"): f"em {event_id}"}]]),
+        generate_inline_buttons(markup),
     )
     return generated
 
@@ -681,7 +676,8 @@ def event_history_message(
         return None
 
     try:
-        event.history
+        if not isinstance(event.history, list):
+            raise json.decoder.JSONDecodeError
     except json.decoder.JSONDecodeError as e:
         raise ApiError(e)
 
@@ -781,7 +777,7 @@ def event_history_message(
     generated.format(
         f"{translate_event_history}:",
         event_formats["a"],
-        generate_buttons(markup),
+        generate_inline_buttons(markup),
     )
     return generated
 
@@ -833,24 +829,20 @@ def confirm_changes_message(message: Message) -> None | int:
             translate = get_translate("errors.message_is_too_long")
         else:
             translate = get_translate("errors.exceeded_limit")
-
-        markup = generate_buttons(
+        markup = [
             [
-                [
-                    {
-                        f"{event_id} {markdown_text[:20]}".ljust(60, "⠀"): {
-                            "switch_inline_query_current_chat": (
-                                f"event({event_id}, {message_id}).text\n"
-                                f"{markdown_text}"
-                            )
-                        }
-                    },
-                    {get_theme_emoji("del"): "md"},
-                ]
+                {
+                    f"{event_id} {markdown_text[:20]}".ljust(60, "⠀"): {
+                        "switch_inline_query_current_chat": (
+                            f"event({event_id}, {message_id}).text\n"
+                            f"{markdown_text}"
+                        )
+                    }
+                },
+                {get_theme_emoji("del"): "md"},
             ]
-        )
-
-        TextMessage(translate, markup).send(reply_to_message_id=message_id)
+        ]
+        TextMessage(translate, generate_inline_buttons(markup)).send(reply_to_message_id=message_id)
         return
 
     text_diff = highlight_text_difference(
@@ -868,25 +860,23 @@ def confirm_changes_message(message: Message) -> None | int:
         text_diff,
     )
     event.text = f"<i>{text_diff}</i>"
-    markup = generate_buttons(
+    markup = [
         [
-            [
-                {get_theme_emoji("back"): f"em {event.event_id}"},
-                {
-                    "📝": {
-                        "switch_inline_query_current_chat": (
-                            f"event({event_id}, {message_id}).text\n{markdown_text}"
-                        )
-                    }
-                },
-                {"💾": f"eet {event.event_id} {event.date}"},
-            ]
+            {get_theme_emoji("back"): f"em {event.event_id}"},
+            {
+                "📝": {
+                    "switch_inline_query_current_chat": (
+                        f"event({event_id}, {message_id}).text\n{markdown_text}"
+                    )
+                }
+            },
+            {"💾": f"eet {event.event_id} {event.date}"},
         ]
-    )
+    ]
     generated.format(
         f"{get_translate('text.are_you_sure_edit')}:",
         event_formats["a"],
-        markup,
+        generate_inline_buttons(markup),
     )
     try:
         generated.edit(request.chat_id, message_id)
@@ -941,10 +931,12 @@ AND (
         request.entity.group_id,
     )
 
-    back_open_markup = generate_buttons(
-        [[{get_theme_emoji("back"): f"pd {date}"}, {"↖️": "None"}]]
+    back_open_markup = [[{get_theme_emoji("back"): f"pd {date}"}, {"↖️": "None"}]]
+    generated = EventsMessage(
+        date=date,
+        markup=generate_inline_buttons(back_open_markup),
+        page=page,
     )
-    generated = EventsMessage(date, markup=back_open_markup, page=page)
 
     if id_list:
         generated.get_page_events(sql_where, params, id_list)
@@ -1002,7 +994,7 @@ def edit_event_date_message(event_id: int, date: datetime) -> EventMessage | Non
 
 
 def edit_events_date_message(
-    id_list: list[int], date: datetime = None
+    id_list: list[int], date: datetime | None = None
 ) -> EventsMessage:
     if date is None:
         date = request.entity.now_time()
@@ -1049,21 +1041,21 @@ def before_event_delete_message(
         else f"ebdc {event.event_id} {event.date}",
         "style": "danger" if is_deletion_confirmed else None,
     }
-    markup = generate_buttons(
+    markup = [
         [
-            [
-                {f"❌ {delete_permanently}": delete_permanently_button},
-                (
-                    {f"🗑 {trash_bin}": f"edb {event.event_id} {event.date}"}
-                    if request.entity.is_premium
-                    else {}
-                ),
-            ],
-            [{get_theme_emoji("back"): f"em {event_id}"}],
-        ]
-    )
+            {f"❌ {delete_permanently}": delete_permanently_button},
+            (
+                {f"🗑 {trash_bin}": f"edb {event.event_id} {event.date}"}
+                if request.entity.is_premium
+                else {}
+            ),
+        ],
+        [{get_theme_emoji("back"): f"em {event_id}"}],
+    ]
     generated.format(
-        f"{get_translate('select.what_do_with_event')}:", event_formats["dt"], markup
+        f"{get_translate('select.what_do_with_event')}:",
+        event_formats["dt"],
+        generate_inline_buttons(markup),
     )
     return generated
 
@@ -1113,7 +1105,7 @@ AND removal_time IS NULL
         args=event_formats["r"],
         if_empty=get_translate("errors.message_empty"),
     )
-    generated.markup = generate_buttons(markup)
+    generated.markup = generate_inline_buttons(markup)
     return generated
 
 
@@ -1136,8 +1128,8 @@ def search_results_message(
 
     if is_placeholder:
         text = f"🔍 {translate_search}\n\n{query.strip()}"
-        markup = generate_buttons([[{get_theme_emoji("back"): "mnm"}]])
-        return TextMessage(text, markup)
+        markup = [[{get_theme_emoji("back"): "mnm"}]]
+        return TextMessage(text, generate_inline_buttons(markup))
 
     query = query.replace("\n", " ").strip()
 
@@ -1149,19 +1141,21 @@ def search_results_message(
         )
         return generated
 
-    markup = generate_buttons(
+    markup = [
         [
-            [
-                {get_theme_emoji("back"): "mnm"},
-                {"↖️": "None"},
-                {"↕️": "None"},
-                {"🔄": "us"},
-                {"💾": "sfe"} if request.entity.is_premium else {},
-                {"⚙️": "sfs"},
-            ]
+            {get_theme_emoji("back"): "mnm"},
+            {"↖️": "None"},
+            {"↕️": "None"},
+            {"🔄": "us"},
+            {"💾": "sfe"} if request.entity.is_premium else {},
+            {"⚙️": "sfs"},
         ]
+    ]
+    generated = EventsMessage(
+        markup=generate_inline_buttons(markup),
+        page=int(page),
+        page_indent=1,
     )
-    generated = EventsMessage(markup=markup, page=int(page), page_indent=1)
     sql_where, params = generate_search_sql_condition(query, filters)
 
     if id_list:
@@ -1200,7 +1194,7 @@ def search_filters_message(message: Message, call_data: str = "") -> TextMessage
         all_string_filters = f"\n{all_string_filters}"
 
     if query.isspace():
-        markup = generate_buttons([[{get_theme_emoji("back"): "mnm"}]])
+        markup = generate_inline_buttons([[{get_theme_emoji("back"): "mnm"}]])
         generated = EventsMessage(markup=markup)
         generated.format(
             title=f"🔍 {translate_search} ...:\n",
@@ -1227,7 +1221,7 @@ def search_filters_message(message: Message, call_data: str = "") -> TextMessage
             {get_theme_emoji("add"): "sf"} if len(filters) < 6 else {},
         ],
     ]
-    return TextMessage(text, generate_buttons(markup))
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def search_filter_message(message: Message, call_data: str) -> TextMessage:
@@ -1242,7 +1236,7 @@ def search_filter_message(message: Message, call_data: str) -> TextMessage:
         all_string_filters = "\n" + all_string_filters
 
     if query.isspace():
-        markup = generate_buttons([[{get_theme_emoji("back"): "mnm"}]])
+        markup = generate_inline_buttons([[{get_theme_emoji("back"): "mnm"}]])
         generated = EventsMessage(markup=markup)
         generated.format(
             title=f"🔍 {translate_search} ...:\n",
@@ -1303,7 +1297,7 @@ def search_filter_message(message: Message, call_data: str) -> TextMessage:
         message.text = f"{text}\n{description}: {sign}{statuses}\n\n{clue_1}:\n{search_filters[filter_type][0]}:"
         return search_filters_message(message)
 
-    return TextMessage(f"{text}\n\n{clue_1}", generate_buttons(markup))
+    return TextMessage(f"{text}\n\n{clue_1}", generate_inline_buttons(markup))
 
 
 def week_event_list_message(id_list: list[int] = (), page: int = 0) -> EventsMessage:
@@ -1353,7 +1347,7 @@ AND (
         request.entity.group_id,
     )
 
-    markup = generate_buttons(
+    markup = generate_inline_buttons(
         [[{get_theme_emoji("back"): "mnm"}, {"🔄": "mnw"}, {"↖️": "None"}]]
     )
     generated = EventsMessage(markup=markup, page=page)
@@ -1404,7 +1398,7 @@ DELETE FROM events
     basket_translate = get_translate("messages.basket")
     message_empty_translate = get_translate("errors.message_empty")
 
-    markup = generate_buttons(
+    markup = generate_inline_buttons(
         [
             [{"🔼": "None"}, {"↕️": "None"}],
             [
@@ -1496,7 +1490,7 @@ AND (
         request.entity.group_id,
     )
 
-    markup = generate_buttons(
+    markup = generate_inline_buttons(
         [
             [
                 {get_theme_emoji("back"): "mnm"},
@@ -1529,7 +1523,7 @@ AND (
 
 
 def send_notifications_messages() -> None:
-    n_date = datetime.now(timezone.utc)
+    n_date = datetime.now(UTC)
     with db.connect():
         result = db.execute(
             """
@@ -1643,7 +1637,7 @@ def limits_message(date: datetime | str | None = None) -> TextMessage:
 
     return TextMessage(
         get_limit_link(f"{date:%d.%m.%Y}"),
-        generate_buttons([[{get_theme_emoji("back"): f"lm {date:%d.%m.%Y}"}]]),
+        generate_inline_buttons([[{get_theme_emoji("back"): f"lm {date:%d.%m.%Y}"}]]),
     )
 
 
@@ -1664,9 +1658,7 @@ def group_message(
 
     if request.is_user:
         startgroup_data = f"group-{group.owner_id}-{group.group_id}"
-        startgroup_url = "https://t.me/{}?startgroup={}".format(
-            bot.user.username, startgroup_data
-        )
+        startgroup_url = f"https://t.me/{bot.user.username}?startgroup={startgroup_data}"
 
         leave_group = get_translate("text.leave_group")
         change_group_name = "✏️ " + get_translate("text.change_group_name")
@@ -1675,89 +1667,83 @@ def group_message(
         export_group = "💾 " + get_translate("text.export_group")
 
         if group.member_status == 2:
-            markup = generate_buttons(
+            markup = [
                 [
-                    [
-                        (
-                            {
-                                change_group_name: {
-                                    "switch_inline_query_current_chat": (
-                                        f"group({group.group_id}, {message_id}).name\n"
-                                        f"{html.unescape(group.name)}"
-                                    )
-                                }
+                    (
+                        {
+                            change_group_name: {
+                                "switch_inline_query_current_chat": (
+                                    f"group({group.group_id}, {message_id}).name\n"
+                                    f"{html.unescape(group.name)}"
+                                )
                             }
-                            if message_id
-                            else {change_group_name: "None"}
-                        ),
-                    ],
-                    [
-                        {delete_group: f"grdb {group.group_id} {mode}"},
-                        (
-                            {remove_bot_from_group: f"grrgr {group.group_id} {mode}"}
-                            if group.chat_id
-                            else {
-                                get_translate("text.add_bot_to_group"): {
-                                    "url": startgroup_url
-                                }
+                        }
+                        if message_id
+                        else {change_group_name: "None"}
+                    ),
+                ],
+                [
+                    {delete_group: f"grdb {group.group_id} {mode}"},
+                    (
+                        {remove_bot_from_group: f"grrgr {group.group_id} {mode}"}
+                        if group.chat_id
+                        else {
+                            get_translate("text.add_bot_to_group"): {
+                                "url": startgroup_url
                             }
-                        ),
-                    ],
-                    [
-                        {get_theme_emoji("back"): f"mngrs {mode}"},
-                        {export_group: f"gre {group.group_id} csv"},
-                    ],
-                ]
-            )
+                        }
+                    ),
+                ],
+                [
+                    {get_theme_emoji("back"): f"mngrs {mode}"},
+                    {export_group: f"gre {group.group_id} csv"},
+                ],
+            ]
         elif group.member_status == 1:
-            markup = generate_buttons(
+            markup = [
                 [
-                    [
-                        {export_group: f"gre {group.group_id} csv"},
-                        (
-                            {
-                                change_group_name: {
-                                    "switch_inline_query_current_chat": (
-                                        f"group({group.group_id}, {message_id}).name\n"
-                                        f"{html.unescape(group.name)}"
-                                    )
-                                }
+                    {export_group: f"gre {group.group_id} csv"},
+                    (
+                        {
+                            change_group_name: {
+                                "switch_inline_query_current_chat": (
+                                    f"group({group.group_id}, {message_id}).name\n"
+                                    f"{html.unescape(group.name)}"
+                                )
                             }
-                            if message_id
-                            else {change_group_name: "None"}
-                        ),
-                    ],
-                    [
-                        (
-                            {remove_bot_from_group: f"grrgr {group.group_id} {mode}"}
-                            if group.chat_id
-                            else {
-                                get_translate("text.add_bot_to_group"): {
-                                    "url": startgroup_url
-                                }
+                        }
+                        if message_id
+                        else {change_group_name: "None"}
+                    ),
+                ],
+                [
+                    (
+                        {remove_bot_from_group: f"grrgr {group.group_id} {mode}"}
+                        if group.chat_id
+                        else {
+                            get_translate("text.add_bot_to_group"): {
+                                "url": startgroup_url
                             }
-                        ),
-                    ],
-                    [
-                        {get_theme_emoji("back"): f"mngrs {mode}"},
-                        {leave_group: f"grlv {group.group_id} {mode}"},
-                    ],
-                ]
-            )
+                        }
+                    ),
+                ],
+                [
+                    {get_theme_emoji("back"): f"mngrs {mode}"},
+                    {leave_group: f"grlv {group.group_id} {mode}"},
+                ],
+            ]
         else:
-            markup = generate_buttons(
+            markup = [
                 [
-                    [
-                        {get_theme_emoji("back"): f"mngrs {mode}"},
-                        {leave_group: f"grlv {group.group_id} {mode}"},
-                    ],
-                ]
-            )
+                    {get_theme_emoji("back"): f"mngrs {mode}"},
+                    {leave_group: f"grlv {group.group_id} {mode}"},
+                ],
+            ]
     else:
         text += f"\nowner_id: `<code>{group.owner_id}</code>`"
-        markup = generate_buttons([[{get_theme_emoji("back"): "mnm"}]])
+        markup = [[{get_theme_emoji("back"): "mnm"}]]
 
-    return TextMessage(text, markup)
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def delete_group_message(
@@ -1776,7 +1762,7 @@ def delete_group_message(
     if request.is_user and group.member_status == 2:
         delete_group = "🗑👥 " + get_translate("text.delete_group")
 
-        message.markup = generate_buttons(
+        message.markup = generate_inline_buttons(
             [
                 [
                     {get_theme_emoji("back"): f"mngr {group_id} {mode}"},
@@ -1863,7 +1849,7 @@ def groups_message(
     else:
         text = groups_message_template.format(0, "")
         markup = [[{get_theme_emoji("back"): "mnm"}, {f"👥 {create_group}": "grcr"}]]
-    return TextMessage(text, generate_buttons(markup))
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def account_message(message_id: int | None = None) -> TextMessage:
@@ -1873,47 +1859,45 @@ def account_message(message_id: int | None = None) -> TextMessage:
         request.entity.user.username,
         parse_utc_datetime(request.entity.user.reg_date),
     )
-    markup = generate_buttons(
-        [
-            (
-                [{f"{get_translate('text.get_premium')} 🤩": "get_premium"}]
-                if request.entity.user.user_status == 0
-                else []
-            ),
-            (
-                [
-                    {
-                        f"{get_translate('text.edit_username')} 👤": {
-                            "switch_inline_query_current_chat": (
-                                f"user({message_id}).name\n"
-                                f"{html.unescape(request.entity.user.username)}"
-                            )
-                        }
-                    }
-                ]
-                if message_id
-                else ()
-            ),
+    markup = [
+        (
+            [{f"{get_translate('text.get_premium')} 🤩": "get_premium"}]
+            if request.entity.user.user_status == 0
+            else []
+        ),
+        (
             [
                 {
-                    f"{get_translate('text.edit_password')} 🤫🔑": {
+                    f"{get_translate('text.edit_username')} 👤": {
                         "switch_inline_query_current_chat": (
-                            "user().password\nold password: \nnew password: "
+                            f"user({message_id}).name\n"
+                            f"{html.unescape(request.entity.user.username)}"
                         )
                     }
                 }
-            ],
-            [
-                {get_theme_emoji("back"): "mnm"},
-                {"📊": "lm now"},
-                {f"{get_translate('text.logout')}🚪👈": {
-                    "callback_data": "logout",
-                    "style": "danger",
-                }},
-            ],
-        ]
-    )
-    return TextMessage(text, markup)
+            ]
+            if message_id
+            else ()
+        ),
+        [
+            {
+                f"{get_translate('text.edit_password')} 🤫🔑": {
+                    "switch_inline_query_current_chat": (
+                        "user().password\nold password: \nnew password: "
+                    )
+                }
+            }
+        ],
+        [
+            {get_theme_emoji("back"): "mnm"},
+            {"📊": "lm now"},
+            {f"{get_translate('text.logout')}🚪👈": {
+                "callback_data": "logout",
+                "style": "danger",
+            }},
+        ],
+    ]
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def select_one_message(
@@ -1969,7 +1953,7 @@ def select_one_message(
         text = get_translate("select.event")
 
     markup.append([{get_theme_emoji("back"): back_data}])
-    return TextMessage(text, generate_buttons(markup))
+    return TextMessage(text, generate_inline_buttons(markup))
 
 
 def select_events_message(
@@ -2007,7 +1991,7 @@ def select_events_message(
             {"↗️": "bsm _" if in_bin else "esm _"},
         ]
     )
-    generated = TextMessage(get_translate("select.events"), generate_buttons(markup))
+    generated = TextMessage(get_translate("select.events"), generate_inline_buttons(markup))
     return generated
 
 

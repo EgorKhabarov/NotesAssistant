@@ -1,26 +1,26 @@
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
 
-# noinspection PyPackageRequirements
-from telebot.types import Message, CallbackQuery
+from cachetools import LRUCache
 
 # noinspection PyPackageRequirements
 from telebot.apihelper import ApiTelegramException
-from cachetools import LRUCache
+
+# noinspection PyPackageRequirements
+from telebot.types import CallbackQuery, Message
 
 import config
-from notes_bot.request import request
-from notes_bot.lang import get_translate
-from notes_bot.utils import telegram_log
-from notes_bot.handlers import not_login_handler
-from notes_bot.types import TelegramAccount, add_chat_cached
-from notes_bot.message_generator import CallBackAnswer, TextMessage
-from notes_api.types import db
+from notes_api.exceptions import ApiError, GroupNotFound, UserNotFound
 from notes_api.logger import logger
+from notes_api.types import db
 from notes_api.utils import is_admin_id, rate_limit
-from notes_api.exceptions import UserNotFound, GroupNotFound, ApiError
+from notes_bot.handlers import not_login_handler
+from notes_bot.lang import get_translate
+from notes_bot.message_generator import CallBackAnswer, TextMessage
+from notes_bot.request import request
+from notes_bot.types import TelegramAccount, add_chat_cached
+from notes_bot.utils import telegram_log
 from telegram_utils.command_parser import command_regex
-
 
 rate_limit_else = LRUCache(maxsize=100)
 rate_limit_200_1800 = LRUCache(maxsize=100)
@@ -39,7 +39,7 @@ def key_func(func: Callable, x: Message | CallbackQuery) -> int:
     lambda *args, **kwargs: request.chat_id,
     lambda *args, **kwargs: None,
 )
-def else_func(args, kwargs, key, sec) -> None:  # noqa
+def else_func(args, kwargs, key, sec) -> None:
     x = kwargs.get("x") or args[1]
     text = get_translate("errors.many_attempts").format(sec)
 

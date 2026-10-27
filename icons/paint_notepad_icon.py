@@ -1,6 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont
 
-
 ICON_SIZE: int = 778
 ICON_NAME: str = "notepad_icon"
 FONT_PATH = "../fonts/Roboto-Black.ttf"

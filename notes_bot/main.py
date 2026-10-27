@@ -7,50 +7,50 @@ from telebot.apihelper import ApiTelegramException
 from telebot.types import CallbackQuery, Message
 
 import config
-from notes_bot.bot import bot
-from notes_bot.request import request
-from notes_bot.buttons_utils import delmarkup
-from notes_bot.dispatcher import process_account
-from notes_bot.message_generator import TextMessage
-from notes_bot.bot_actions import delete_message_action
-from notes_bot.lang import get_translate, get_theme_emoji
-from notes_bot.utils import (
-    telegram_log,
-    re_edit_message,
-    html_to_markdown,
-    re_inline_message,
-    re_user_edit_name_message,
-    re_group_edit_name_message,
-    re_user_edit_password_message,
-)
-from notes_bot.handlers import (
-    reply_handler,
-    add_event_state,
-    add_group_state,
-    command_handler,
-    callback_handler,
-    cache_create_group,
-    cache_add_event_date,
-)
-from notes_bot.bot_messages import (
-    group_message,
-    groups_message,
-    account_message,
-    search_results_message,
-    confirm_changes_message,
-)
-from notes_api.types import db
-from notes_api.logger import logger
 from notes_api.exceptions import (
-    WrongDate,
-    TextIsTooBig,
-    LimitExceeded,
     GroupNotFound,
+    LimitExceeded,
+    NotEnoughPermissions,
     NotGroupMember,
     NotUniqueUsername,
-    NotEnoughPermissions,
+    TextIsTooBig,
+    WrongDate,
 )
-from telegram_utils.buttons_generator import generate_buttons
+from notes_api.logger import logger
+from notes_api.types import db
+from notes_bot.bot import bot
+from notes_bot.bot_actions import delete_message_action
+from notes_bot.bot_messages import (
+    account_message,
+    confirm_changes_message,
+    group_message,
+    groups_message,
+    search_results_message,
+)
+from notes_bot.buttons_utils import delmarkup
+from notes_bot.dispatcher import process_account
+from notes_bot.handlers import (
+    add_event_state,
+    add_group_state,
+    cache_add_event_date,
+    cache_create_group,
+    callback_handler,
+    command_handler,
+    reply_handler,
+)
+from notes_bot.lang import get_theme_emoji, get_translate
+from notes_bot.message_generator import TextMessage
+from notes_bot.request import request
+from notes_bot.utils import (
+    html_to_markdown,
+    re_edit_message,
+    re_group_edit_name_message,
+    re_inline_message,
+    re_user_edit_name_message,
+    re_user_edit_password_message,
+    telegram_log,
+)
+from telegram_utils.buttons_generator import generate_inline_buttons
 
 
 @bot.message_handler(content_types=["migrate_to_chat_id"], chat_types=["group"])
@@ -125,7 +125,7 @@ def inline_message_handler(message: Message):
             delete_message_action(message)
 
     if request.is_member:
-        return None
+        return
 
     if match := re_user_edit_name_message.findall(message.html_text):
         telegram_log("send", "user edit name")
@@ -157,8 +157,8 @@ def inline_message_handler(message: Message):
             TextMessage(get_translate("errors.incorrect_password")).reply(message)
         else:
             text = get_translate("errors.success")
-            markup = generate_buttons([[{get_theme_emoji("del"): "md"}]])
-            TextMessage(text, markup).send(message.chat.id)
+            markup = [[{get_theme_emoji("del"): "md"}]]
+            TextMessage(text, generate_inline_buttons(markup)).send(message.chat.id)
             delete_message_action(message)
 
     elif match := re_group_edit_name_message.findall(message.html_text):

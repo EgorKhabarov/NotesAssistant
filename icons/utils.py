@@ -3,7 +3,6 @@ from pathlib import Path
 import requests
 from PIL import Image
 
-
 ICON_SIZE: int = 778
 link = "https://web.telegram.org/a/img-apple-64/{emoji_name}.png"
 headers = {

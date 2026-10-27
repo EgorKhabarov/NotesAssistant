@@ -4,13 +4,13 @@ from time import time
 from telebot.apihelper import ApiTelegramException
 
 # noinspection PyPackageRequirements
-from telebot.types import Message, CallbackQuery
+from telebot.types import CallbackQuery, Message
 
 from notes_bot.bot import bot
-from notes_bot.request import request
-from notes_bot.lang import get_translate
 from notes_bot.buttons_utils import delmarkup
-from notes_bot.message_generator import TextMessage, CallBackAnswer
+from notes_bot.lang import get_translate
+from notes_bot.message_generator import CallBackAnswer, TextMessage
+from notes_bot.request import request
 
 
 def delete_message_action(message: Message) -> None:

@@ -1,6 +1,5 @@
 from PIL import Image, ImageDraw
 
-
 ICON_SIZE: int = 778
 ICON_NAME: str = "minimalistic_notepad_icon"
 

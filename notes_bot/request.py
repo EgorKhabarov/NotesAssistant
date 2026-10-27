@@ -3,7 +3,8 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 
 # noinspection PyPackageRequirements
-from telebot.types import Message, CallbackQuery
+from telebot.types import CallbackQuery, Message
+
 from notes_bot.types import TelegramAccount
 
 

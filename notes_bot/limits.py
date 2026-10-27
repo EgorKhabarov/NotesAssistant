@@ -1,16 +1,16 @@
 from io import BytesIO
 from urllib.parse import urlencode
 
+from PIL import Image, ImageFont
+from PIL.ImageDraw import Draw
+
 # noinspection PyPackageRequirements
 from telebot.formatting import hide_link
-from PIL.ImageDraw import Draw
-from PIL import Image, ImageFont
 
-from notes_bot.request import request
-from notes_bot.lang import get_translate
-from notes_api.types import event_limits
 from config import LIMIT_IMAGE_GENERATOR_URL
-
+from notes_api.types import event_limits
+from notes_bot.lang import get_translate
+from notes_bot.request import request
 
 noimage = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"
 FONT_PATH = "fonts/LiberationSans-Regular.ttf"

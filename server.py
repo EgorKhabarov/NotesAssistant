@@ -1,22 +1,22 @@
 import os
 from threading import Thread
 
+from flask import Flask, abort, request, send_file
+
 # noinspection PyPackageRequirements
 from telebot.types import Update
-from flask import Flask, request, abort, send_file
 
 import config
 from notes_api.logger import logger
-
 
 app = Flask(__name__)
 
 # noinspection PyBroadException
 try:
-    from start_bot import start_bot, start_notifications_thread
-    from notes_bot.main import bot
+    from notes_bot.bot import bot_log_info, bot_webhook_info
     from notes_bot.limits import create_image_from_link
-    from notes_bot.bot import bot_webhook_info, bot_log_info
+    from notes_bot.main import bot
+    from start_bot import start_bot, start_notifications_thread
 
     logger.info(bot_log_info())
 
@@ -85,9 +85,11 @@ if (
         if request.headers.get("content-type") != "application/json":
             return abort(403)
 
-        if secret_token := request.headers.get("X-Telegram-Bot-Api-Secret-Token", None):
-            if secret_token != config.TELEGRAM_WEBHOOK_SECRET_TOKEN:
-                return abort(403)
+        if (
+            (secret_token := request.headers.get("X-Telegram-Bot-Api-Secret-Token", None))
+            and secret_token != config.TELEGRAM_WEBHOOK_SECRET_TOKEN
+        ):
+            return abort(403)
 
         bot.process_new_updates([Update.de_json(request.json)])
         return "ok", 200
@@ -104,10 +106,11 @@ if config.GITHUB_WEBHOOK and config.GITHUB_WEBHOOK_FLASK_PATH:
     """
     From https://habr.com/ru/articles/457348/
     """
-    import git
-    import json
-    import hmac
     import hashlib
+    import hmac
+    import json
+
+    import git
 
     def is_valid_signature(x_hub_signature, data, private_key):
         # x_hub_signature and data are from the webhook payload
@@ -151,12 +154,12 @@ if config.GITHUB_WEBHOOK and config.GITHUB_WEBHOOK_FLASK_PATH:
                 request.data,
                 config.GITHUB_WEBHOOK_SECRET,
             ):
-                print("Deploy signature failed: {sig}".format(sig=x_hub_signature))
+                print(f"Deploy signature failed: {x_hub_signature}")
                 return abort(abort_code)
 
             payload = request.get_json()
             if payload is None:
-                print("Deploy payload is empty: {payload}".format(payload=payload))
+                print(f"Deploy payload is empty: {payload}")
                 return abort(abort_code)
 
             update_type, branch = payload["ref"].split("/", maxsplit=2)[1:]

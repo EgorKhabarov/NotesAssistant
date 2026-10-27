@@ -1,21 +1,19 @@
-import re
 import random
+import re
 import string
-from time import time
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
-
-from cachetools import LRUCache
-from cachetools.keys import hashkey
+from time import time
 
 # noinspection PyPackageRequirements
 from argon2 import PasswordHasher
 
 # noinspection PyPackageRequirements
-from argon2.exceptions import VerifyMismatchError, InvalidHashError
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
+from cachetools import LRUCache
+from cachetools.keys import hashkey
 
 import config
-
 
 re_username = re.compile("^[a-zA-Z](?!.*__)[a-zA-Z0-9_]{2,29}[a-zA-Z0-9]$")
 re_date = re.compile(r"\A\d{2}\.\d{2}\.\d{4}\Z")

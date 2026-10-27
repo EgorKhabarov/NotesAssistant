@@ -8,7 +8,7 @@ class LazyTranslation(dict):
     def __missing__(self, lang_iso: str):
         try:
             module = importlib.import_module(f"notes_bot.locales.{lang_iso}")
-            data = getattr(module, "translation")
+            data = module.translation
         except ModuleNotFoundError:
             if lang_iso != "en":
                 return self["en"]

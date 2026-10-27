@@ -1,53 +1,57 @@
 import csv
 import json
-from uuid import uuid4
-import xml.etree.ElementTree as xml  # noqa
-from sqlite3 import Error
-from cachetools import LFUCache
+
+# noinspection PyPep8Naming
+import xml.etree.ElementTree as xml
 from collections import UserList
-from io import StringIO, BytesIO
-from dataclasses import dataclass
+from collections.abc import Callable
 from contextlib import contextmanager
-from typing import Callable, Any, Literal
-from functools import cached_property, wraps
-from datetime import datetime, timedelta, timezone
 
 # noinspection PyPackageRequirements
 from contextvars import ContextVar
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from functools import cached_property, wraps
+from io import BytesIO, StringIO
+from sqlite3 import Error
+from typing import Any, Literal
+from uuid import uuid4
 
-from sqlalchemy import create_engine, text as sqlalchemy_text, event as sqlalchemy_event
-from sqlalchemy.engine import Engine, Connection, CursorResult
+from cachetools import LFUCache
+from sqlalchemy import create_engine
+from sqlalchemy import event as sqlalchemy_event
+from sqlalchemy import text as sqlalchemy_text
+from sqlalchemy.engine import Connection, CursorResult, Engine
 
 import config
 from notes_api.exceptions import (
     ApiError,
-    Forbidden,
-    WrongDate,
-    TextIsTooBig,
-    UserNotFound,
     DataBaseError,
-    GroupNotFound,
-    MediaNotFound,
     EventNotFound,
+    Forbidden,
+    GroupNotFound,
     LimitExceeded,
-    StatusRepeats,
+    MediaNotFound,
+    NotEnoughPermissions,
     NotGroupMember,
     NotUniqueEmail,
     NotUniqueUsername,
-    NotEnoughPermissions,
     StatusLengthExceeded,
+    StatusRepeats,
+    TextIsTooBig,
+    UserNotFound,
+    WrongDate,
 )
 from notes_api.utils import (
-    re_date,
-    re_username,
+    generate_token,
     hash_password,
     is_valid_year,
-    generate_token,
-    verify_password,
+    re_date,
+    re_username,
     sql_date_pattern,
     sql_datetime_pattern,
+    verify_password,
 )
-
 
 event_limits = {
     -1: {
@@ -311,7 +315,7 @@ class Limit:
         self.status = status
         self.user_max_limits = event_limits[status]
 
-    def get_event_limits(self, date: str | datetime = None) -> list[tuple[int]]:
+    def get_event_limits(self, date: str | datetime | None = None) -> list[tuple[int]]:
         date = date if date else datetime.now().strftime("%d.%m.%Y")
 
         try:
@@ -445,7 +449,7 @@ SELECT (
         )
 
     def now_limit_percent(
-        self, date: str | datetime = None
+        self, date: str | datetime | None = None
     ) -> list[int, int, int, int, int, int, int, int]:
         actual_limits = self.get_event_limits(date)
 
@@ -684,7 +688,7 @@ SELECT media_id,
         If the event should already be deleted, returns -1.
         """
         if sql_date_pattern.match(self.removal_time):
-            _d1 = datetime.now(timezone.utc).date()
+            _d1 = datetime.now(UTC).date()
             _d2 = datetime.strptime(self.removal_time, "%Y-%m-%d").date()
             _days = 30 - (_d1 - _d2).days
             return -1 if _days < 0 else _days
@@ -693,7 +697,7 @@ SELECT media_id,
 
     def days_before_event(self, timezone_: int = 0) -> int:
         _date = self.datetime
-        n_time = datetime.now(timezone.utc) + timedelta(hours=timezone_)
+        n_time = datetime.now(UTC) + timedelta(hours=timezone_)
         n_time = datetime(n_time.year, n_time.month, n_time.day)
         dates = []
 
@@ -957,9 +961,9 @@ class Account:
 
     def now_time(self) -> datetime:
         """
-        Returns datetime.now(timezone.utc) taking into account the user's time zone
+        Returns datetime.now(UTC) taking into account the user's time zone
         """
-        return datetime.now(timezone.utc) + timedelta(hours=self.settings.timezone)
+        return datetime.now(UTC) + timedelta(hours=self.settings.timezone)
 
     def check_event_exists(self, event_id: int, in_bin: bool = False) -> bool:
         try:
@@ -1580,7 +1584,7 @@ SELECT 1
 
         return False
 
-    def create_group(self, name: str, icon: bytes = None) -> str:
+    def create_group(self, name: str, icon: bytes | None = None) -> str:
         if self.limit.is_exceeded_for_groups(create=True):
             raise LimitExceeded
 

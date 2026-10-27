@@ -1,16 +1,17 @@
 #!/usr/bin/python3
-import os
 import csv
+import os
 import subprocess
-from pprint import pprint, pformat
-from datetime import datetime, timezone
-from typing import Literal, Any
+from datetime import UTC, datetime
+from pprint import pformat, pprint
+from typing import Any, Literal
 
 from IPython import embed
-from table2string import Table, Themes, Theme
+from table2string import Table, Theme, Themes
 
 from config import WSGI_PATH, __version__
-from notes_api.types import db, Account as notes_api_Account
+from notes_api.types import Account as notes_api_Account
+from notes_api.types import db
 from notes_bot.types import TelegramAccount  # noqa
 
 
@@ -19,8 +20,8 @@ def execute(
     params: dict | tuple = (),
     commit: bool = False,
     mode: Literal["table", "raw", "pprint"] = "table",
-    max_width: int | type(max) | type(max) | None = max,
-    max_height: int | type(max) | type(max) | None = max,
+    max_width: int | type(max) | None = max,
+    max_height: int | type(max) | None = max,
     maximize_height: bool = False,
     align: tuple[str, ...] | str = "*",
     name: str | None = None,
@@ -100,7 +101,7 @@ def execute(
 
 
 def export(query: str = "SELECT * FROM events;", params: dict | tuple = ()) -> str:
-    path = f"data/exports/{datetime.now(timezone.utc):%Y-%m-%d_%H-%M-%S}.csv"
+    path = f"data/exports/{datetime.now(UTC):%Y-%m-%d_%H-%M-%S}.csv"
 
     try:
         os.mkdir("data/exports")

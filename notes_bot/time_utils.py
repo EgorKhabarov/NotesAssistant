@@ -1,8 +1,8 @@
 from calendar import isleap
 from datetime import datetime, timedelta
 
-from notes_bot.request import request
 from notes_bot.lang import get_translate
+from notes_bot.request import request
 
 
 def now_time_calendar() -> tuple[int, int]:

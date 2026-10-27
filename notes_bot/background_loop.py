@@ -1,15 +1,15 @@
-from time import sleep
+from datetime import UTC, datetime
 from threading import Thread
-from datetime import datetime, timezone
+from time import sleep
 
 import config
-from notes_bot.bot_messages import send_notifications_messages
 from notes_api.log_cleaner import clear_logs
+from notes_bot.bot_messages import send_notifications_messages
 
 
 def start_background_loop():
     def process():
-        while_time = datetime.now(timezone.utc)
+        while_time = datetime.now(UTC)
         weekday = while_time.weekday()
         hour = while_time.hour
         minute = while_time.minute
@@ -22,7 +22,7 @@ def start_background_loop():
 
     process()
     # wait for the notification cycle to start
-    sleep(60 - datetime.now(timezone.utc).second)
+    sleep(60 - datetime.now(UTC).second)
     while True:
         process()
         sleep(60)

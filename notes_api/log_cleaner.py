@@ -1,9 +1,8 @@
 import os
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime, timezone
 
 from config import LOG_FILE_PATH
-
 
 removal_lines_start = ("[", "|", "+")
 removal_lines_in = (
@@ -29,7 +28,7 @@ def filter_function(test_line: str) -> bool:
 
 def clear_logs() -> None:
     log_folder = Path(LOG_FILE_PATH).parent
-    utc_time = datetime.now(timezone.utc)
+    utc_time = datetime.now(UTC)
     output_file_path = os.path.join(
         log_folder, "old_logs", f"{utc_time:%Y%m%d%H%M%S}.log"
     )

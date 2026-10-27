@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
-from config import LOG_FILE_PATH
 
+from config import LOG_FILE_PATH
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

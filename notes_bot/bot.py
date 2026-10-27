@@ -1,13 +1,13 @@
 import time
 
+from table2string import Table
+
 # noinspection PyPackageRequirements
 from telebot import TeleBot
-from table2string import Table
 
 import config
 from notes_api.logger import logger
 from telegram_utils.command_parser import command_regex
-
 
 if config.TELEGRAM_WEBHOOK:
     threaded, num_threads = False, 6
@@ -20,6 +20,7 @@ bot.parse_mode = "html"
 bot.disable_web_page_preview = True
 bot.protect_content = False
 for i in range(5):
+    # noinspection PyBroadException
     try:
         bot_webhook_info = bot.get_webhook_info()
         break
@@ -61,7 +62,7 @@ def bot_log_info():
         if v != str(bot_dict.get(k)):
             raise AttributeError(
                 f"{k}\n"
-                f"Should be {key_list[k]}\n"
+                f"Should be {v}\n"
                 f"Actually is {bot_dict[k]}\n\n"
                 f"{bot_settings.strip()}"
             )
