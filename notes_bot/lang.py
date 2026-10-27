@@ -1,4 +1,5 @@
 import importlib
+from collections.abc import Callable
 from typing import Any, Literal
 
 from notes_bot.request import request
@@ -24,7 +25,7 @@ class LazyTranslation(dict):
 translation = LazyTranslation()
 
 
-def get_translate(target: str, lang_iso: str | None = None) -> str | Any:
+def get_translate(target: str, lang_iso: str | None = None) -> str | Callable | Any:
     _lang_iso: str = lang_iso or (
         request.entity.settings.lang if request.entity else "en"
     )
