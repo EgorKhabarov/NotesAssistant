@@ -146,6 +146,6 @@ recent_changes_time ASC
 }
 
 string_branch = "" if branch == "master" else f":{branch}"
-__version__ = "2026.10.29.1"
+__version__ = "2026.10.29.2"
 __author__ = "EgorKhabarov"
 __repository__ = "https://github.com/EgorKhabarov/NotesAssistant"
