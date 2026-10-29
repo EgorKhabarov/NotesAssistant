@@ -121,7 +121,7 @@ engine: Engine = create_engine(config.SQLALCHEMY_DATABASE_URI, echo=False)
 
 
 class DataBase:
-    def __init__(self):
+    def __init__(self) -> None:
         self._functions: dict[str, tuple[int, Callable]] = {}
 
         @sqlalchemy_event.listens_for(engine, "connect")

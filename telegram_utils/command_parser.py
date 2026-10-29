@@ -1,13 +1,24 @@
 import re
+import sys
 from typing import Any
 
-from telegram_utils.argument_parser import _DataTypes, get_arguments
+from telegram_utils.argument_parser import (
+    _DataTypes,
+    _ReturnTypes,
+    get_arguments,
+    validate_arguments,
+)
 
 
 class __CommandRegex:
-    def __init__(self):
-        self.username = None
-        self.__regex = None
+    # re.Pattern is marked as @final and should not be subclassed
+    def __init__(self) -> None:
+        self.username: str = "[a-zA-Z0-9_]{5,32}"
+        self.__regex: re.Pattern[str] = re.compile(
+            r"(?s)\A/(?P<command>[a-zA-Z0-9_]+)"
+            rf"(?P<username>@{self.username}\b)?"
+            r"(?:\s|$)(?P<arguments>.+)?\Z"
+        )
         self.set_username()
 
     def set_username(self, raw_bot_username: str | None = None) -> None:
@@ -20,19 +31,22 @@ class __CommandRegex:
             r"(?:\s|$)(?P<arguments>.+)?\Z"
         )
 
-    def __getattr__(self, item):
-        if item in ("username", "set_bot_username"):
-            return self.username if item == "username" else self.set_username
-
-        return getattr(self.__regex, item)
+    def match(
+        self,
+        string: str,
+        pos: int = 0,
+        endpos: int = sys.maxsize,
+    ) -> re.Match[str] | None:
+        return self.__regex.match(string, pos, endpos)
 
 
 command_regex = __CommandRegex()
 
 
 def get_command_arguments(
-    message: str, arguments: dict[str, _DataTypes | tuple[_DataTypes, Any]]
-) -> dict[str, Any]:
+    message: str,
+    arguments: dict[str, _DataTypes | tuple[_DataTypes, Any]],
+) -> dict[str, _ReturnTypes]:
     """
     >>> try: get_command_arguments("", {"arg1": "long str", "arg2": "str"})
     ... except SyntaxError as e: str(e)
@@ -62,26 +76,23 @@ def get_command_arguments(
     >>> get_command_arguments("abrakadabra", {"text": "long str"})
     {'text': None}
     """
+    validate_arguments(arguments)
     match = command_regex.match(message)
-    command_arguments = (
-        match.groupdict()["arguments"] if hasattr(match, "groupdict") else None
-    )
-    result = get_arguments(command_arguments, arguments)
-
-    if match is not None and command_arguments is not None:
-        return result
 
     if match is None:
         return {k: None for k in arguments}
 
-    if command_arguments is None:
+    command_arguments = match.groupdict()["arguments"] if match else ""
+    if not command_arguments:
         return {
             k: (v[1] if isinstance(v, tuple) else None) for k, v in arguments.items()
         }
+    return get_arguments(command_arguments, arguments)
 
 
 def parse_command(
-    message: str, arguments: dict[str, _DataTypes | tuple[_DataTypes, Any]]
+    message: str,
+    arguments: dict[str, _DataTypes | tuple[_DataTypes, Any]],
 ) -> dict[str, Any]:
     """
     >>> try: parse_command("", {"arg1": "long str", "arg2": "str"})

@@ -8,7 +8,7 @@ from notes_api.logger import logger
 from notes_bot.bot_messages import send_notifications_messages
 
 
-def start_background_loop():
+def start_background_loop() -> None:
     logger.info("Background loop started")
 
     def process():

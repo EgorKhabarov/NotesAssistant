@@ -22,9 +22,9 @@ from notes_bot.types import TelegramAccount, add_chat_cached
 from notes_bot.utils import telegram_log
 from telegram_utils.command_parser import command_regex
 
-rate_limit_else = LRUCache(maxsize=100)
-rate_limit_200_1800 = LRUCache(maxsize=100)
-rate_limit_30_60 = LRUCache(maxsize=100)
+rate_limit_else: LRUCache = LRUCache(maxsize=100)
+rate_limit_200_1800: LRUCache = LRUCache(maxsize=100)
+rate_limit_30_60: LRUCache = LRUCache(maxsize=100)
 
 
 # noinspection PyUnusedLocal
@@ -57,6 +57,8 @@ def wrapper(func: Callable, x: Message | CallbackQuery):
             if request.is_user:
                 request.entity = TelegramAccount(request.chat_id)
             else:
+                if x.from_user is None:
+                    raise ValueError("from_user not found")
                 request.entity = TelegramAccount(x.from_user.id, request.chat_id)
         except (UserNotFound, GroupNotFound):
             request.entity = None
@@ -76,7 +78,7 @@ def wrapper(func: Callable, x: Message | CallbackQuery):
                 return
 
             return func(x)
-    except (ApiError, ApiTelegramException) as e:
+    except (ApiError, ApiTelegramException, Exception) as e:
         logger.exception(e)
         text = get_translate("errors.error")
 

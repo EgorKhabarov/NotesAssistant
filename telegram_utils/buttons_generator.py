@@ -1,25 +1,24 @@
-from typing import Any, Literal
+from typing import Any, Literal, TypeAlias
 
 from telebot.types import (
     CopyTextButton,
-    ForceReply,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
     SwitchInlineQueryChosenChat,
 )
 
-buttons_data_types = (
-    list[list[dict[str, str | dict | CopyTextButton | SwitchInlineQueryChosenChat]]]
-    | list[list[str]]
-    | dict[str, Any]
-    | None
+# str | dict | CopyTextButton | SwitchInlineQueryChosenChat
+_InlineRowItem: TypeAlias = dict[str, Any]
+_ButtonsDataTypes: TypeAlias = (
+    list[list[_InlineRowItem]] | list[list[str]] | dict[str, Any] | None
 )
 keyboard_types = Literal["inline", "reply", "force_reply", "reply_remove"] | str
 
 
-def generate_inline_buttons(buttons_data: buttons_data_types) -> InlineKeyboardMarkup:
+def generate_inline_buttons(
+    buttons_data: _ButtonsDataTypes,
+) -> InlineKeyboardMarkup | None:
     """
     >>> from pprint import pprint
     >>> markup = [
@@ -75,45 +74,42 @@ def generate_inline_buttons(buttons_data: buttons_data_types) -> InlineKeyboardM
     if isinstance(buttons_data, InlineKeyboardMarkup):
         return buttons_data
 
+    if not isinstance(buttons_data, list):
+        return None
+
     keyboard: list[list[InlineKeyboardButton]] = []
     for row in buttons_data:
         keyboard.append([])
         for button in row:
-            if button == {}:
+            if not isinstance(button, dict) or button == {}:
                 continue
             if len(button.keys()) == 1:
-                [(text, data)] = button.items()
+                text, data = next(iter(button.items()))
                 if isinstance(data, str):
                     keyboard[-1].append(InlineKeyboardButton(text, callback_data=data))
                 elif isinstance(data, dict):
-                    [(text, data)] = button.items()
-                    if data.get("switch_inline_query_chosen_chat"):
-                        if isinstance(
-                            data["switch_inline_query_chosen_chat"],
-                            str,
-                        ):
-                            new_data = SwitchInlineQueryChosenChat(
-                                data["switch_inline_query_chosen_chat"]
+                    btn_params = dict(data)
+                    if btn_params.get("switch_inline_query_chosen_chat"):
+                        chat_param = btn_params["switch_inline_query_chosen_chat"]
+                        if isinstance(chat_param, str):
+                            btn_params["switch_inline_query_chosen_chat"] = (
+                                SwitchInlineQueryChosenChat(chat_param)
                             )
-                            data["switch_inline_query_chosen_chat"] = new_data
-                        elif isinstance(
-                            data["switch_inline_query_chosen_chat"],
-                            dict,
-                        ):
-                            new_data = SwitchInlineQueryChosenChat(
-                                **data["switch_inline_query_chosen_chat"]
+                        elif isinstance(chat_param, dict):
+                            btn_params["switch_inline_query_chosen_chat"] = (
+                                SwitchInlineQueryChosenChat(**chat_param)
                             )
-                            data["switch_inline_query_chosen_chat"] = new_data
                         else:
                             return None
-                    if data.get("copy_text"):
-                        if isinstance(data["copy_text"], str):
-                            data["copy_text"] = CopyTextButton(data["copy_text"])
-                        elif isinstance(data["copy_text"], dict):
-                            data["copy_text"] = CopyTextButton(**data["copy_text"])
+                    if btn_params.get("copy_text"):
+                        copy_param = btn_params["copy_text"]
+                        if isinstance(copy_param, str):
+                            btn_params["copy_text"] = CopyTextButton(copy_param)
+                        elif isinstance(copy_param, dict):
+                            btn_params["copy_text"] = CopyTextButton(**copy_param)
                         else:
                             return None
-                    keyboard[-1].append(InlineKeyboardButton(text=text, **data))
+                    keyboard[-1].append(InlineKeyboardButton(text=text, **btn_params))
                 else:
                     return None
             else:
@@ -121,7 +117,9 @@ def generate_inline_buttons(buttons_data: buttons_data_types) -> InlineKeyboardM
     return InlineKeyboardMarkup(keyboard=keyboard)
 
 
-def generate_reply_buttons(buttons_data: buttons_data_types) -> ReplyKeyboardMarkup:
+def generate_reply_buttons(
+    buttons_data: _ButtonsDataTypes,
+) -> ReplyKeyboardMarkup | None:
     """
     >>> from pprint import pprint
     >>> markup = [["1", "2", "3"]]
@@ -130,34 +128,36 @@ def generate_reply_buttons(buttons_data: buttons_data_types) -> ReplyKeyboardMar
     """
     if isinstance(buttons_data, InlineKeyboardMarkup):
         return buttons_data
+    if not isinstance(buttons_data, list):
+        return None
     markup = ReplyKeyboardMarkup()
     for row in buttons_data:
         markup.add(*row)
     return markup
 
 
-def generate_force_reply_buttons(buttons_data: buttons_data_types) -> ForceReply:
-    if isinstance(buttons_data, InlineKeyboardMarkup):
-        return buttons_data
-    return ForceReply(**{} if buttons_data is None else buttons_data)
+# def generate_force_reply_buttons(buttons_data: _ButtonsDataTypes) -> ForceReply:
+#     if isinstance(buttons_data, InlineKeyboardMarkup):
+#         return buttons_data
+#     return ForceReply(**{} if buttons_data is None else buttons_data)
 
 
-def generate_reply_remove_buttons(
-    buttons_data: buttons_data_types,
-) -> ReplyKeyboardRemove:
-    if isinstance(buttons_data, InlineKeyboardMarkup):
-        return buttons_data
-    return ReplyKeyboardRemove(**{} if buttons_data is None else buttons_data)
+# def generate_reply_remove_buttons(
+#     buttons_data: _ButtonsDataTypes,
+# ) -> ReplyKeyboardRemove:
+#     if isinstance(buttons_data, InlineKeyboardMarkup):
+#         return buttons_data
+#     return ReplyKeyboardRemove(**{} if buttons_data is None else buttons_data)
 
 
 def edit_button_data(
     markup: InlineKeyboardMarkup,
     row: int,
     column: int,
-    callback_data: str = ...,
-    text: str = ...,
+    callback_data: str | None = None,
+    text: str | None = None,
 ) -> None:
-    if callback_data is not ...:
+    if callback_data is not None:
         markup.keyboard[row][column].callback_data = callback_data
-    if text is not ...:
+    if text is not None:
         markup.keyboard[row][column].text = text
