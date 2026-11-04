@@ -448,9 +448,7 @@ SELECT (
             or groups_creator + create > max_groups_creator
         )
 
-    def now_limit_percent(
-        self, date: str | datetime | None = None
-    ) -> list[int]:
+    def now_limit_percent(self, date: str | datetime | None = None) -> list[int]:
         actual_limits = self.get_event_limits(date)
 
         # noinspection PyTypeChecker
@@ -698,7 +696,11 @@ SELECT media_id,
     def days_before_event(self, timezone_: int = 0) -> int:
         _date = self.datetime
         curr_time_temp = datetime.now(UTC) + timedelta(hours=timezone_)
-        curr_time = datetime(curr_time_temp.year, curr_time_temp.month, curr_time_temp.day)
+        curr_time = datetime(
+            curr_time_temp.year,
+            curr_time_temp.month,
+            curr_time_temp.day,
+        )
         dates = []
 
         def prepare_date(date: str) -> tuple[int, datetime]:

@@ -132,7 +132,9 @@ if config.GITHUB_WEBHOOK and config.GITHUB_WEBHOOK_FLASK_PATH:
                 or "X-Github-Delivery" not in request.headers
                 or "X-Hub-Signature" not in request.headers
                 or "User-Agent" not in request.headers
-                or not request.headers.get("User-Agent", "").startswith("GitHub-Hookshot/")
+                or not request.headers.get("User-Agent", "").startswith(
+                    "GitHub-Hookshot/"
+                )
             ):
                 return abort(abort_code)
 

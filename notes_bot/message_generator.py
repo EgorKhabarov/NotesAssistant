@@ -494,7 +494,9 @@ SELECT user_id,
         dt_date = datetime.strptime(self._date, "%d.%m.%Y")
         curr_time = request.entity.now_time()
         curr_time = datetime(curr_time.year, curr_time.month, curr_time.day)
-        str_date, rel_date, week_date = relatively_string_date((dt_date - curr_time).days)
+        str_date, rel_date, week_date = relatively_string_date(
+            (dt_date - curr_time).days
+        )
 
         format_string = (
             title.format(
