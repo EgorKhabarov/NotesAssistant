@@ -19,14 +19,15 @@ bot = TeleBot(config.BOT_TOKEN, threaded=threaded, num_threads=num_threads)
 bot.parse_mode = "html"
 bot.disable_web_page_preview = True
 bot.protect_content = False
-for i in range(5):
+for i in range(7):
     # noinspection PyBroadException
     try:
         bot_webhook_info = bot.get_webhook_info()
         break
     except Exception as e:
-        logger.info(f"Attempt {i+1} get_webhook_info: {e}")
-        time.sleep(3)
+        sleep_time = 3 * (2 ** i)
+        logger.warning(f"Attempt {i+1} get_webhook_info failed: {e}. Retrying in {sleep_time}s...")
+        time.sleep(sleep_time)
 bot_settings = """
 Bot Settings => Group Privacy => disabled
 Bot Settings => Inline Mode   => disabled

@@ -450,7 +450,7 @@ SELECT (
 
     def now_limit_percent(
         self, date: str | datetime | None = None
-    ) -> list[int, int, int, int, int, int, int, int]:
+    ) -> list[int]:
         actual_limits = self.get_event_limits(date)
 
         # noinspection PyTypeChecker
@@ -633,7 +633,7 @@ class Event:
     _history: str | None = None
 
     @property
-    def is_delete(self) -> bool:
+    def is_deleted(self) -> bool:
         return bool(self.removal_time)
 
     @property
@@ -649,11 +649,11 @@ class Event:
         return json.loads(self._status)
 
     @property
-    def string_statuses(self) -> str:
+    def statuses_text(self) -> str:
         return ",".join(self.statuses)
 
     @property
-    def media_list(self) -> list["Media"]:
+    def get_media_list(self) -> list["Media"]:
         try:
             media_list = db.execute(
                 """
@@ -688,36 +688,36 @@ SELECT media_id,
         If the event should already be deleted, returns -1.
         """
         if sql_date_pattern.match(self.removal_time):
-            _d1 = datetime.now(UTC).date()
-            _d2 = datetime.strptime(self.removal_time, "%Y-%m-%d").date()
-            _days = 30 - (_d1 - _d2).days
-            return -1 if _days < 0 else _days
+            current_date = datetime.now(UTC).date()
+            removal_date = datetime.strptime(self.removal_time, "%Y-%m-%d").date()
+            days_remaining = 30 - (current_date - removal_date).days
+            return -1 if days_remaining < 0 else days_remaining
         else:
             return 30
 
     def days_before_event(self, timezone_: int = 0) -> int:
         _date = self.datetime
-        n_time = datetime.now(UTC) + timedelta(hours=timezone_)
-        n_time = datetime(n_time.year, n_time.month, n_time.day)
+        curr_time_temp = datetime.now(UTC) + timedelta(hours=timezone_)
+        curr_time = datetime(curr_time_temp.year, curr_time_temp.month, curr_time_temp.day)
         dates = []
 
         def prepare_date(date: str) -> tuple[int, datetime]:
             y = datetime.strptime(date, "%d.%m.%Y")
-            return (y - n_time).days, y
+            return (y - curr_time).days, y
 
         # Every day
         if "📬" in self.statuses:
-            return prepare_date(f"{n_time:%d.%m.%Y}")[0]
+            return prepare_date(f"{curr_time:%d.%m.%Y}")[0]
 
         # Every week
         if "🗞" in self.statuses:
-            now_wd, event_wd = n_time.weekday(), _date.weekday()
-            next_date = n_time + timedelta(days=(event_wd - now_wd + 7) % 7)
+            now_wd, event_wd = curr_time.weekday(), _date.weekday()
+            next_date = curr_time + timedelta(days=(event_wd - now_wd + 7) % 7)
             dates.append(next_date)
 
         # Every month
         elif "📅" in self.statuses:
-            day_diff, dt = prepare_date(f"{_date:%d}.{n_time:%m.%Y}")
+            day_diff, dt = prepare_date(f"{_date:%d}.{curr_time:%m.%Y}")
             month, year = dt.month, dt.year
             if day_diff >= 0:
                 dates.append(dt)
@@ -729,11 +729,11 @@ SELECT media_id,
 
         # Every year
         elif {*self.statuses}.intersection({"📆", "🎉", "🎊"}):
-            dt = prepare_date(f"{_date:%d.%m}.{n_time:%Y}")[1]
-            if dt.date() < n_time.date():
-                dates.append(dt.replace(year=n_time.year + 1))
+            dt = prepare_date(f"{_date:%d.%m}.{curr_time:%Y}")[1]
+            if dt.date() < curr_time.date():
+                dates.append(dt.replace(year=curr_time.year + 1))
             else:
-                dates.append(dt.replace(year=n_time.year))
+                dates.append(dt.replace(year=curr_time.year))
 
         else:
             return prepare_date(self.date)[0]
@@ -861,7 +861,7 @@ SELECT user_id,
     def get_from_user_id(cls, user_id: int) -> "User":
         # TODO защита от перебора брутфорса и количества попыток
         try:
-            user = db.execute(
+            users = db.execute(
                 """
 SELECT user_id,
        user_status,
@@ -876,19 +876,19 @@ SELECT user_id,
  WHERE user_id = :user_id;
 """,
                 params={"user_id": user_id},
-            )[0]
+            )
         except DataBaseError as e:
             raise ApiError(e)
-        except IndexError:
+        if not users:
             raise UserNotFound
-
+        user = users[0]
         return User(*user)
 
     @classmethod
     def get_from_password(cls, username: str, password: str) -> "User":
         # TODO защита от перебора брутфорса и количества попыток
         try:
-            user = db.execute(
+            users = db.execute(
                 """
 SELECT user_id,
        user_status,
@@ -903,19 +903,31 @@ SELECT user_id,
  WHERE username = :username;
 """,
                 params={"username": username},
-            )[0]
-
-            if not verify_password(user[4], password):
-                raise IndexError
+            )
         except DataBaseError as e:
             raise ApiError(e)
-        except IndexError:
+        if not users:
             raise UserNotFound
-
+        user = users[0]
+        if not verify_password(user[4], password):
+            raise UserNotFound
         return User(*user)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({', '.join(f'{k}={v!r}' for k, v in self.__dict__.items())})"
+        string_args = (
+            f"{k}={getattr(self, k)!r}"
+            for k in (
+                "user_id",
+                "user_status",
+                "username",
+                "email",
+                "max_event_id",
+                "token_create_time",
+                "reg_date",
+                "icon",
+            )
+        )
+        return f"{self.__class__.__name__}({', '.join(string_args)})"
 
 
 class Account:
@@ -1678,8 +1690,9 @@ SELECT group_id,
              FROM members
             WHERE user_id = :user_id
        )
-ORDER BY name ASC
-LIMIT :limit OFFSET :offset;
+ ORDER BY name ASC
+ LIMIT :limit
+OFFSET :offset;
 """,
                 params={
                     "user_id": self.user_id,
@@ -1709,8 +1722,9 @@ SELECT groups.group_id,
   JOIN members ON groups.group_id = members.group_id
  WHERE members.user_id = :user_id
        AND members.member_status < 1
-ORDER BY name ASC
-LIMIT :limit OFFSET :offset;
+ ORDER BY name ASC
+ LIMIT :limit
+OFFSET :offset;
 """,
                 params={
                     "user_id": self.user_id,
@@ -1740,8 +1754,9 @@ SELECT groups.group_id,
   JOIN members ON groups.group_id = members.group_id
  WHERE members.user_id = :user_id
        AND members.member_status >= 1
-ORDER BY name ASC
-LIMIT :limit OFFSET :offset;
+ ORDER BY name ASC
+ LIMIT :limit
+OFFSET :offset;
 """,
                 params={
                     "user_id": self.user_id,
@@ -1771,8 +1786,9 @@ SELECT groups.group_id,
   JOIN members ON groups.group_id = members.group_id
  WHERE members.user_id = :user_id
        AND members.member_status >= 2
-ORDER BY name ASC
-LIMIT :limit OFFSET :offset;
+ ORDER BY name ASC
+ LIMIT :limit
+OFFSET :offset;
 """,
                 params={
                     "user_id": self.user_id,
@@ -2437,10 +2453,12 @@ SELECT user_id
 
 
 def get_account_from_password(
-    username: str, password: str, group_id: str | None = None
+    username: str,
+    password: str,
+    group_id: str | None = None,
 ) -> Account:
     try:
-        user = db.execute(
+        users = db.execute(
             """
 SELECT user_id,
        password
@@ -2448,16 +2466,15 @@ SELECT user_id,
  WHERE username = :username;
 """,
             params={"username": username},
-        )[0]
-
-        if not verify_password(user[1], password):
-            raise IndexError
+        )
     except DataBaseError as e:
         raise ApiError(e)
-    except IndexError:
+    if not users:
         raise UserNotFound
-
-    return Account(user[0], group_id)
+    user_id, password_hash = users[0]
+    if not verify_password(password_hash, password):
+        raise IndexError
+    return Account(user_id, group_id)
 
 
 def set_user_status(user_id: int, user_status: int) -> None:

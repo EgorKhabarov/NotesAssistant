@@ -30,7 +30,7 @@ def clear_logs() -> None:
     log_folder = Path(LOG_FILE_PATH).parent
     utc_time = datetime.now(UTC)
     output_file_path = os.path.join(
-        log_folder, "old_logs", f"{utc_time:%Y%m%d%H%M%S}.log"
+        log_folder, "old_logs", f"{utc_time:%Y-%m-%d_%H-%M-%S}.log"
     )
     output_errors_file_path = rf"{output_file_path.removesuffix('.log')}_errors.log"
     Path(output_file_path).parent.mkdir(parents=True, exist_ok=True)

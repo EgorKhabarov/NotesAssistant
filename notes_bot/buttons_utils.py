@@ -514,7 +514,7 @@ def create_select_status_keyboard(
     def join(lst) -> str:
         return ",".join(lst)
 
-    string_statuses = join(status_list)
+    statuses_text = join(status_list)
 
     if folder_path == "folders":
         buttons_data: tuple[tuple[tuple[str]]] = get_translate(
@@ -524,7 +524,7 @@ def create_select_status_keyboard(
             *[
                 [
                     {
-                        f"{title:{config.ts}<80}": f"{prefix} {string_statuses} {folder} {arguments}"
+                        f"{title:{config.ts}<80}": f"{prefix} {statuses_text} {folder} {arguments}"
                     }
                     for (title, folder) in row
                 ]
@@ -550,10 +550,10 @@ def create_select_status_keyboard(
                     get_theme_emoji("back"): (
                         f"{back} {arguments}"
                         if updated
-                        else f"{back} {string_statuses} folders {arguments}"
+                        else f"{back} {statuses_text} folders {arguments}"
                     )
                 },
-                {"💾": f"{save} {arguments} {string_statuses}"},
+                {"💾": f"{save} {arguments} {statuses_text}"},
             ],
         ]
     else:
@@ -561,7 +561,7 @@ def create_select_status_keyboard(
             f"buttons.select_status.{folder_path}"
         )
 
-        def unique_string_statuses(row: str) -> str:
+        def unique_statuses_text(row: str) -> str:
             new_status = row.split(maxsplit=1)[0]
 
             if new_status == "⬜":
@@ -579,7 +579,7 @@ def create_select_status_keyboard(
         markup = [
             *[
                 [
-                    {f"{row:{config.ts}<80}": unique_string_statuses(row)}
+                    {f"{row:{config.ts}<80}": unique_statuses_text(row)}
                     for row in status_column
                 ]
                 for status_column in buttons_data
@@ -587,7 +587,7 @@ def create_select_status_keyboard(
             [
                 {
                     get_theme_emoji("back"): (
-                        f"{prefix} {string_statuses} folders {arguments}"
+                        f"{prefix} {statuses_text} folders {arguments}"
                     )
                 }
             ],

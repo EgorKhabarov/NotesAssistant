@@ -154,39 +154,34 @@ class TextMessage:
 
         .edit(chat_id, message_id)
         """
-        if not message_id:
-            if request.is_callback:
-                message: Message = request.query.message
-            else:
-                message: Message = request.query
-
-            message_id = message.message_id
+        chat_id_int: int = int(chat_id or request.chat_id)
+        message_id_int: int = int(message_id or request.message.message_id)
 
         if only_markup:
             bot.edit_message_reply_markup(
-                chat_id=int(chat_id or request.chat_id),
-                message_id=int(message_id),
+                chat_id=chat_id_int,
+                message_id=message_id_int,
                 reply_markup=self.markup,
                 **kwargs,
             )
         elif markup is not None:
             bot.edit_message_text(
                 text=self.text,
-                chat_id=int(chat_id or request.chat_id),
-                message_id=int(message_id),
+                chat_id=chat_id_int,
+                message_id=message_id_int,
                 reply_markup=markup,
                 **kwargs,
             )
         else:
             bot.edit_message_text(
                 text=self.text,
-                chat_id=int(chat_id or request.chat_id),
-                message_id=int(message_id),
+                chat_id=chat_id_int,
+                message_id=message_id_int,
                 reply_markup=self.markup,
                 **kwargs,
             )
 
-    def reply(self, message: Message = None, **kwargs):
+    def reply(self, message: Message | None = None, **kwargs):
         if message:
             if message.reply_to_message:
                 message_thread_id = message.reply_to_message.message_thread_id
@@ -311,7 +306,7 @@ class EventMessage(TextMessage):
             weekday=week_date,
             reldate=rel_date,
             event_id=f"{self.event.event_id}",
-            statuses=self.event.string_statuses,
+            statuses=self.event.statuses_text,
             markdown_text=markdown_text,
             days_before=days_before,
             days_before_delete=days_before_delete,
@@ -330,7 +325,7 @@ class EventsMessage(TextMessage):
     def __init__(
         self,
         date: str = "now",
-        event_list: tuple | list[Event, ...] = (),
+        event_list: tuple | list[Event] = (),
         markup: InlineKeyboardMarkup | None = None,
         page: int = 0,
         page_indent: int = 0,
@@ -497,9 +492,9 @@ SELECT user_id,
         :return: message.text
         """
         dt_date = datetime.strptime(self._date, "%d.%m.%Y")
-        n_time = request.entity.now_time()
-        n_time = datetime(n_time.year, n_time.month, n_time.day)
-        str_date, rel_date, week_date = relatively_string_date((dt_date - n_time).days)
+        curr_time = request.entity.now_time()
+        curr_time = datetime(curr_time.year, curr_time.month, curr_time.day)
+        str_date, rel_date, week_date = relatively_string_date((dt_date - curr_time).days)
 
         format_string = (
             title.format(
@@ -525,7 +520,7 @@ SELECT user_id,
         else:
             for num, event in enumerate(self.event_list):
                 str_date, rel_date, week_date = relatively_string_date(
-                    (event.datetime - n_time).days
+                    (event.datetime - curr_time).days
                 )
 
                 days_before = ""
@@ -558,7 +553,7 @@ SELECT user_id,
                         ),
                         numd=f"{num + 1}",
                         event_id=f"{event.event_id}",
-                        statuses=event.string_statuses,
+                        statuses=event.statuses_text,
                         markdown_text=markdown_text,
                         days_before=days_before,
                         days_before_delete=days_before_delete,

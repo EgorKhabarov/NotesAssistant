@@ -291,7 +291,7 @@ def fetch_weather(city: str) -> str:
     Returns the current weather for the city
     """
     logger.info(f"weather in {city}")
-    url = "http://api.openweathermap.org/data/2.5/weather"
+    url = "https://api.openweathermap.org/data/2.5/weather"
     weather = requests.get(
         url,
         params={
@@ -300,6 +300,7 @@ def fetch_weather(city: str) -> str:
             "units": "metric",
             "lang": request.entity.settings.lang,
         },
+        timeout=5,
     ).json()
     weather_icon = weather["weather"][0]["icon"]
     dn = {"d": "☀", "n": "🌑"}
@@ -378,7 +379,7 @@ def fetch_forecast(city: str) -> str:
     5-day weather forecast for the city
     """
     logger.info(f"forecast in {city}")
-    url = "http://api.openweathermap.org/data/2.5/forecast"
+    url = "https://api.openweathermap.org/data/2.5/forecast"
     weather = requests.get(
         url,
         params={
@@ -387,6 +388,7 @@ def fetch_forecast(city: str) -> str:
             "units": "metric",
             "lang": request.entity.settings.lang,
         },
+        timeout=5,
     ).json()
     dn = {"d": "☀", "n": "🌑"}
     we = {
@@ -435,10 +437,10 @@ def fetch_forecast(city: str) -> str:
         date = ".".join(city_time.split()[0].split(".")[::-1])
         if date not in result:
             dt_date = datetime.strptime(date, "%d.%m.%Y")
-            n_time = request.entity.now_time()
-            n_time = datetime(n_time.year, n_time.month, n_time.day)
+            curr_time = request.entity.now_time()
+            curr_time = datetime(curr_time.year, curr_time.month, curr_time.day)
             str_date, rel_date, week_date = relatively_string_date(
-                (dt_date - n_time).days
+                (dt_date - curr_time).days
             )
             result += f"\n\n<b>{dt_date:%d.%m.%Y}</b> <u><i>{str_date}  {week_date}</i></u> ({rel_date})"
 

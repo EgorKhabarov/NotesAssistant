@@ -87,8 +87,8 @@ def parse_utc_datetime(
     time += timedelta(hours=request.entity.settings.timezone)
 
     if relatively_date:
-        n_time = request.entity.now_time()
-        rel_date = relatively_string_date((time - n_time).days)[1]
+        curr_time = request.entity.now_time()
+        rel_date = relatively_string_date((time - curr_time).days)[1]
         return f"{time:%Y.%m.%d %H:%M:%S}", rel_date
     else:
         return f"{time:%Y.%m.%d %H:%M:%S}"

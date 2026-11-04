@@ -525,7 +525,7 @@ def event_message(
                     if message_id
                     else {"📝": "None"}
                 ),
-                {"🏷": f"es {event.string_statuses} folders {event_id} {event.date}"},
+                {"🏷": f"es {event.statuses_text} folders {event_id} {event.date}"},
                 {"🗑": f"ebd {event_id} {event.date}"},
             ],
             [
@@ -968,7 +968,7 @@ def event_status_message(
 ) -> EventMessage:
     statuses_list = statuses.split(",")
     generated = EventMessage(event_id)
-    if generated.event.string_statuses == statuses:
+    if generated.event.statuses_text == statuses:
         updated = True
     markup = create_select_status_keyboard(
         prefix="es",
@@ -1949,7 +1949,7 @@ def select_one_message(
 
     markup = []
     for event in events_list:
-        button_title = f"{event.event_id}.{event.string_statuses} {event.text}"
+        button_title = f"{event.event_id}.{event.statuses_text} {event.text}"
         button_title = button_title.ljust(60, "⠀")[:60]
 
         if is_in_wastebasket or is_in_search or is_open:
@@ -1989,7 +1989,7 @@ def select_events_message(
 
     markup = []
     for n, event in enumerate(events_list):
-        button_title = f"{event.event_id}.{event.string_statuses} {event.text}"
+        button_title = f"{event.event_id}.{event.statuses_text} {event.text}"
         button_title = button_title.ljust(60, "⠀")[:60]
         if in_bin or is_in_search:
             button_title = f"{event.date}.{button_title}"[:60]

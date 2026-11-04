@@ -89,7 +89,7 @@ def bot_command_handler(message: Message):
     """
     Catches commands from users
     """
-    telegram_log("send", html_to_markdown(message.html_text))
+    telegram_log("send", html_to_markdown(message.html_text or ""))
     command_handler(message)
 
 
@@ -99,7 +99,7 @@ def bot_callback_query_handler(call: CallbackQuery):
     """
     Catches button clicks
     """
-    telegram_log("press", call.data)
+    telegram_log("press", call.data or "")
     callback_handler(call)
 
 
@@ -111,7 +111,7 @@ def processing_search_message(message: Message):
     """
     Catches search messages
     """
-    query = html_to_markdown(message.html_text).removeprefix("#")
+    query = html_to_markdown(message.html_text or "").removeprefix("#")
     telegram_log("search", query)
     search_results_message(query).send()
 
