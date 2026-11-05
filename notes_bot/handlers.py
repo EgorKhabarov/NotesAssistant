@@ -368,7 +368,8 @@ def command_handler(message: Message) -> None:
         )["format"].strip()
 
         if file_format not in ("csv", "xml", "json", "jsonl"):
-            return TextMessage(get_translate("errors.export_format")).reply(message)
+            TextMessage(get_translate("errors.export_format")).reply(message)
+            return
 
         file = request.entity.export_data(
             f"events_{request.entity.now_time():%Y-%m-%d_%H-%M-%S}.{file_format}",
@@ -471,6 +472,7 @@ def command_handler(message: Message) -> None:
             else:
                 TextMessage(get_translate("errors.invalid_request")).send()
                 help_message("CommandOpen", "page commands")
+    return
 
 
 _handlers = {}
